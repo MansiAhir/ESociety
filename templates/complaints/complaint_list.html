@@ -1,0 +1,75 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Complaints — eSociety{% endblock %}
+{% block body_class %}{% if user.role == 'security' %}theme-security{% endif %}{% endblock %}
+{% block nav_class %}{% if user.role == 'security' %}nav-security{% endif %}{% endblock %}
+{% block role_badge_class %}{% if user.role == 'security' %}security{% else %}resident{% endif %}{% endblock %}
+{% block role_badge_label %}{% if user.role == 'security' %}🛡️ Security{% else %}🏠 Resident{% endif %}{% endblock %}
+{% block user_av_class %}{% if user.role == 'security' %}security-av{% else %}resident-av{% endif %}{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  {% if user.role == 'security' %}<a href="{% url 'security_dashboard' %}" class="sb-link"><span class="sb-icon">🛡️</span> Dashboard</a>
+  {% else %}<a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>{% endif %}
+  <a href="{% url 'visitor_list' %}"   class="sb-link"><span class="sb-icon">👥</span> Visitors</a>
+  <a href="{% url 'complaint_list' %}" class="sb-link active"><span class="sb-icon">🛠️</span> Complaints</a>
+  {% if user.role == 'resident' %}<a href="{% url 'add_complaint' %}" class="sb-link"><span class="sb-icon">➕</span> Add Complaint</a>{% endif %}
+  <a href="{% url 'facility_list' %}"  class="sb-link"><span class="sb-icon">🏊</span> Facilities</a>
+  <a href="{% url 'payment_list' %}"   class="sb-link"><span class="sb-icon">💳</span> Payments</a>
+  <a href="{% url 'notice_list' %}"    class="sb-link"><span class="sb-icon">📋</span> Notices</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>🛠️ Complaints</h1>
+    <p>{% if user.role == 'resident' %}Your submitted complaints{% else %}All society complaints{% endif %}</p>
+  </div>
+  {% if user.role == 'resident' %}<a href="{% url 'add_complaint' %}" class="btn-teal">+ Raise Complaint</a>{% endif %}
+</div>
+
+<!-- Summary stats -->
+<div class="stat-row" style="grid-template-columns:repeat(3,1fr);max-width:600px;margin-bottom:1.5rem;">
+  <div class="stat-card sc-gold"><div class="sc-lbl">Total</div><div class="sc-val">{{ complaints|length }}</div></div>
+  <div class="stat-card sc-red"><div class="sc-lbl">Pending</div><div class="sc-val">{{ pending_count }}</div></div>
+  <div class="stat-card sc-teal"><div class="sc-lbl">Resolved</div><div class="sc-val">{{ resolved_count }}</div></div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><span class="panel-title">All Complaints</span></div>
+  <div class="panel-body" style="padding:0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Resident</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for complaint in complaints %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            <span style="display:flex;align-items:center;gap:6px;font-weight:600">
+              {% if complaint.complaint_type == 'Plumbing' %}🔧{% elif complaint.complaint_type == 'Electrical' %}💡{% else %}📝{% endif %}
+              {{ complaint.complaint_type }}
+            </span>
+          </td>
+          <td>{{ complaint.description|truncatechars:55 }}</td>
+          <td>{{ complaint.resident.first_name }} {{ complaint.resident.last_name }}</td>
+          <td>{{ complaint.complaint_date|date:"d M Y" }}</td>
+          <td><span class="badge {% if complaint.status == 'Resolved' %}badge-resolved{% else %}badge-open{% endif %}">{{ complaint.status }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted)">No complaints found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

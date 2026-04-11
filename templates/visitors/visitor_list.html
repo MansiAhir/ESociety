@@ -1,0 +1,171 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Visitor Log — eSociety{% endblock %}
+{% block body_class %}{% if user.role == 'security' %}theme-security{% endif %}{% endblock %}
+{% block nav_class %}{% if user.role == 'security' %}nav-security{% endif %}{% endblock %}
+{% block logo_icon_class %}{% if user.role == 'security' %}security-icon{% else %}resident-icon{% endif %}{% endblock %}
+{% block logo_icon %}{% if user.role == 'security' %}🛡️{% else %}🏛️{% endif %}{% endblock %}
+{% block role_badge_class %}{% if user.role == 'security' %}security{% else %}resident{% endif %}{% endblock %}
+{% block role_badge_label %}{% if user.role == 'security' %}🛡️ Security Guard{% else %}🏠 Resident{% endif %}{% endblock %}
+{% block user_av_class %}{% if user.role == 'security' %}security-av{% else %}resident-av{% endif %}{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  {% if user.role == 'security' %}
+    <a href="{% url 'security_dashboard' %}" class="sb-link"><span class="sb-icon">🛡️</span> Dashboard</a>
+  {% else %}
+    <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  {% endif %}
+  <a href="{% url 'visitor_list' %}"   class="sb-link active"><span class="sb-icon">👥</span> Visitors</a>
+  <a href="{% url 'add_visitor' %}"    class="sb-link"><span class="sb-icon">➕</span> Add Visitor</a>
+  <a href="{% url 'complaint_list' %}" class="sb-link"><span class="sb-icon">🛠️</span> Complaints</a>
+  <a href="{% url 'facility_list' %}"  class="sb-link"><span class="sb-icon">🏊</span> Facilities</a>
+  <a href="{% url 'payment_list' %}"   class="sb-link"><span class="sb-icon">💳</span> Payments</a>
+  <a href="{% url 'notice_list' %}"    class="sb-link"><span class="sb-icon">📋</span> Notices</a>
+  <a href="{% url 'alert_panel' %}"    class="sb-link"><span class="sb-icon">🚨</span> Alerts</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>🔔 Visitor Log</h1>
+    <p>
+      {% if user.role == 'security' %}All gate entries — verify OTP before allowing entry{% else %}Your visitors — approve or reject pending requests{% endif %}
+    </p>
+  </div>
+  <a href="{% url 'add_visitor' %}" class="btn-teal">+ Add Visitor</a>
+</div>
+
+{% if messages %}
+  {% for msg in messages %}
+    <div class="alert {% if msg.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}"
+         style="margin-bottom:1rem;padding:0.75rem 1rem;border-radius:8px;">
+      {{ msg }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Filter strip -->
+<div style="display:flex;gap:0.6rem;margin-bottom:1.3rem;flex-wrap:wrap;">
+  <a href="?status=" class="btn-outline-gold" style="{% if not request.GET.status %}background:var(--gold);color:var(--dark);{% endif %}">All</a>
+  <a href="?status=Approved" class="btn-outline-gold">Approved</a>
+  <a href="?status=Pending"  class="btn-outline-gold">Pending</a>
+  <a href="?status=Rejected" class="btn-outline-gold">Rejected</a>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <span class="panel-title">All Visitors ({{ visitors|length }})</span>
+    {% if user.role == 'security' %}
+    <span style="font-size:0.8rem;color:var(--muted);">OTP column visible to security only</span>
+    {% endif %}
+  </div>
+  <div class="panel-body" style="padding:0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Visitor Name</th>
+          <th>Type</th>
+          <th>Resident</th>
+          <th>Entry Time</th>
+          <th>Exit Time</th>
+          <th>Status</th>
+          {% if user.role == 'resident' %}<th>Action</th>{% endif %}
+          {% if user.role == 'security' %}<th>OTP</th><th>Action</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for visitor in visitors %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td style="font-weight:600">{{ visitor.visitor_name }}</td>
+          <td><span class="badge badge-{{ visitor.visitor_type|lower }}">{{ visitor.visitor_type }}</span></td>
+          <td>{{ visitor.resident.first_name }} {{ visitor.resident.last_name }}</td>
+          <td>{{ visitor.entry_time|date:"d M Y, h:i A" }}</td>
+          <td>
+            {% if visitor.exit_time %}
+              {{ visitor.exit_time|date:"h:i A" }}
+            {% else %}
+              <span style="color:var(--teal-light)">Inside</span>
+            {% endif %}
+          </td>
+          <td><span class="badge badge-{{ visitor.approval_status|lower }}">{{ visitor.approval_status }}</span></td>
+
+          {# ── RESIDENT: Approve / Reject pending visitors ── #}
+          {% if user.role == 'resident' %}
+          <td>
+            {% if visitor.approval_status == 'Pending' %}
+            <div class="v-action-row">
+              <form method="POST" action="{% url 'approve_visitor' visitor.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve"/>
+                <button type="submit" class="btn-approve" title="Approve">✓ Approve</button>
+              </form>
+              <form method="POST" action="{% url 'approve_visitor' visitor.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject"/>
+                <button type="submit" class="btn-reject" title="Reject">✗ Reject</button>
+              </form>
+            </div>
+            {% elif visitor.approval_status == 'Approved' and visitor.otp %}
+              {# Show OTP to resident after approval so they can share it #}
+              <span class="otp-inline" title="Share with your visitor"
+                    style="font-family:monospace;font-weight:700;letter-spacing:0.15em;
+                           color:var(--teal);background:var(--panel-bg);
+                           border:1px solid var(--teal);border-radius:6px;
+                           padding:2px 8px;font-size:0.95rem;">
+                {{ visitor.otp }}
+              </span>
+            {% else %}—{% endif %}
+          </td>
+          {% endif %}
+
+          {# ── SECURITY: OTP column + Verify OTP / Mark Exit / Approve-Reject ── #}
+          {% if user.role == 'security' %}
+          <td>
+            {% if visitor.otp and visitor.approval_status == 'Approved' %}
+              <span style="font-family:monospace;font-weight:700;letter-spacing:0.15em;
+                           color:var(--teal);font-size:0.95rem;">{{ visitor.otp }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if visitor.approval_status == 'Approved' and not visitor.exit_time and not visitor.is_verified %}
+              {# Verify OTP button for entry #}
+              <a href="{% url 'verify_otp_page' visitor.id %}" class="btn-teal" style="font-size:0.78rem;padding:4px 10px;">
+                🔐 Verify OTP
+              </a>
+            {% elif visitor.is_verified and not visitor.exit_time %}
+              {# Mark exit for verified visitors inside #}
+              <form method="POST" action="{% url 'mark_exit' %}">
+                {% csrf_token %}
+                <input type="hidden" name="visitor_id" value="{{ visitor.id }}"/>
+                <button type="submit" class="btn-outline-gold" style="font-size:0.78rem;padding:4px 10px;">
+                  🚪 Mark Exit
+                </button>
+              </form>
+            {% elif visitor.approval_status == 'Pending' %}
+              {# Security can also approve/reject in emergency #}
+              <div class="v-action-row">
+                <form method="POST" action="{% url 'approve_visitor' visitor.id %}">
+                  {% csrf_token %}<input type="hidden" name="action" value="approve"/>
+                  <button type="submit" class="btn-approve" title="Approve">✓</button>
+                </form>
+                <form method="POST" action="{% url 'approve_visitor' visitor.id %}">
+                  {% csrf_token %}<input type="hidden" name="action" value="reject"/>
+                  <button type="submit" class="btn-reject" title="Reject">✗</button>
+                </form>
+              </div>
+            {% else %}—{% endif %}
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--muted)">No visitors found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

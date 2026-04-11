@@ -1,0 +1,84 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Book Facility — eSociety{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  <a href="{% url 'facility_list' %}"  class="sb-link"><span class="sb-icon">🏊</span> All Facilities</a>
+  <a href="{% url 'book_facility' %}"  class="sb-link active"><span class="sb-icon">📅</span> Book Facility</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>📅 Book a Facility</h1>
+    <p>Reserve a shared amenity slot</p>
+  </div>
+  <a href="{% url 'facility_list' %}" class="btn-outline-gold">← Back to List</a>
+</div>
+
+<div class="grid-2">
+  <!-- Facility picker -->
+  <div>
+    <div class="fac-grid">
+      {% for facility in facilities %}
+      <div class="fac-card" data-fac-id="{{ facility.id }}">
+        {% comment %} <div class="fac-icon">
+          {% if 'pool' in facility.facility_name|lower or 'swim' in facility.facility_name|lower %}🏊
+          {% elif 'gym' in facility.facility_name|lower %}🏋️
+          {% elif 'hall' in facility.facility_name|lower %}🎉
+          {% elif 'court' in facility.facility_name|lower or 'badminton' in facility.facility_name|lower %}🏸
+          {% elif 'garden' in facility.facility_name|lower %}🌿
+          {% else %}🏟️{% endif %}
+        </div> {% endcomment %}
+        <div class="fac-icon">{{ facility.emoji|default:"🏟️" }}</div>
+        <div class="fac-name">{{ facility.facility_name }}</div>
+        <div class="fac-fee">₹{{ facility.booking_fee }}</div>
+        <div class="fac-avail {% if facility.availability == 'Not Available' %}fac-na{% endif %}">{{ facility.availability }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Booking form -->
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Booking Form</span></div>
+    <div class="panel-body">
+      <form method="POST" action="{% url 'book_facility' %}">
+        {% csrf_token %}
+        <div class="fg">
+          <label>Facility</label>
+          <select name="facility_id" id="facilitySelect" required>
+            <option value="">Select facility</option>
+            {% for facility in facilities %}
+            <option value="{{ facility.id }}" {% if selected_facility == facility.id %}selected{% endif %} {% if facility.availability == 'Not Available' %}disabled{% endif %}>
+              {{ facility.facility_name }} — ₹{{ facility.booking_fee }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="fg"><label>Booking Date</label><input type="date" name="booking_date" required min="{% now 'Y-m-d' %}"/></div>
+        <div class="fg">
+          <label>Start Time</label>
+          <input type="time" name="start_time" required>
+        </div>
+
+        <div class="fg">
+          <label>End Time</label>
+          <input type="time" name="end_time" required>
+        </div>
+        <div class="fg">
+          <label>Payment Status</label>
+          <select name="payment_status" required>
+            <option value="Paid">Pay Now (Online)</option>
+            <option value="Unpaid">Pay Later at Counter</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-gold btn-full">Confirm Booking</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

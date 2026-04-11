@@ -1,0 +1,471 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Resident Dashboard — eSociety{% endblock %}
+{% block body_class %}{% endblock %}
+{% block nav_class %}{% endblock %}
+{% block logo_icon_class %}resident-icon{% endblock %}
+{% block logo_icon %}🏛️{% endblock %}
+{% block role_badge_class %}resident{% endblock %}
+{% block role_badge_label %}🏠 Resident{% endblock %}
+{% block user_av_class %}resident-av{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">My Portal</div>
+  <a href="{% url 'resident_dashboard' %}" class="sb-link {% if request.resolver_match.url_name == 'resident_dashboard' %}active{% endif %}">
+    <span class="sb-icon">🏠</span> Dashboard
+  </a>
+  <a href="{% url 'visitor_list' %}" class="sb-link {% if request.resolver_match.url_name == 'visitor_list' %}active{% endif %}">
+    <span class="sb-icon">🔔</span> Visitors
+    {% if pending_visitor_count %}<span class="sb-badge">{{ pending_visitor_count }}</span>{% endif %}
+  </a>
+  <a href="{% url 'complaint_list' %}" class="sb-link {% if request.resolver_match.url_name == 'complaint_list' %}active{% endif %}">
+    <span class="sb-icon">🛠️</span> Complaints
+    {% if open_complaints %}<span class="sb-badge">{{ open_complaints|length }}</span>{% endif %}
+  </a>
+  <a href="{% url 'facility_list' %}" class="sb-link {% if request.resolver_match.url_name == 'facility_list' %}active{% endif %}">
+    <span class="sb-icon">🏊</span> Facilities
+  </a>
+  <a href="{% url 'booking_list' %}" class="sb-link {% if request.resolver_match.url_name == 'booking_list' %}active{% endif %}">
+    <span class="sb-icon">📅</span> My Bookings
+  </a> {% endcomment %}
+  {% comment %} <a href="{% url 'book_facility' %}" class="sb-link {% if request.resolver_match.url_name == 'book_facility' %}active{% endif %}">
+    <span class="sb-icon">➕</span> Book Facility
+  </a> {% endcomment %}
+  {% comment %} <a href="{% url 'payment_list' %}" class="sb-link {% if request.resolver_match.url_name == 'payment_list' %}active{% endif %}">
+    <span class="sb-icon">💳</span> Payments
+    {% if pending_payments %}<span class="sb-badge">{{ pending_payments|length }}</span>{% endif %}
+  </a>
+  <a href="{% url 'notice_list' %}" class="sb-link {% if request.resolver_match.url_name == 'notice_list' %}active{% endif %}">
+    <span class="sb-icon">📋</span> Notices
+  </a>
+  <a href="{% url 'alert_panel' %}" class="sb-link {% if request.resolver_match.url_name == 'alert_panel' %}active{% endif %}">
+    <span class="sb-icon">🚨</span> Alerts
+  </a>
+
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+
+<!-- WELCOME -->
+<div class="welcome-bar" id="overview" data-section="overview">
+  <div>
+    <h1 class="welcome-title">Welcome back, <span>{{ user.first_name }}!</span></h1>
+    <p class="welcome-sub">{{ user.email }} &nbsp;·&nbsp; {% now "l, d F Y" %}</p>
+  </div>
+  <span class="status-pill live"><span class="blink-dot"></span> All Systems Live</span>
+</div>
+
+<!-- STAT CARDS -->
+<div class="stat-row">
+  <div class="stat-card sc-gold">
+    <div class="sc-lbl">Pending Dues</div>
+    <div class="sc-val">₹{{ total_pending_amount|default:"0" }}</div>
+    <div class="sc-sub warn">{% if pending_payments %}{{ pending_payments|length }} payment(s) due{% else %}All clear ✓{% endif %}</div>
+  </div>
+  <div class="stat-card sc-red">
+    <div class="sc-lbl">Open Complaints</div>
+    <div class="sc-val">{{ open_complaints|length|default:"0" }}</div>
+    <div class="sc-sub danger">{% if open_complaints %}Awaiting resolution{% else %}No open issues{% endif %}</div>
+  </div>
+  <div class="stat-card sc-teal">
+    <div class="sc-lbl">Visitor Requests</div>
+    <div class="sc-val">{{ visitor_requests|length|default:"0" }}</div>
+    <div class="sc-sub {% if pending_visitor_count %}warn{% else %}ok{% endif %}">
+      {% if pending_visitor_count %}{{ pending_visitor_count }} need approval{% else %}All reviewed{% endif %}
+    </div>
+  </div>
+  <div class="stat-card sc-navy">
+    <div class="sc-lbl">Notices</div>
+    <div class="sc-val">{{ notices|length|default:"0" }}</div>
+    <div class="sc-sub warn">Latest updates</div>
+  </div>
+</div>
+
+<!-- ROW 1: PAYMENTS + COMPLAINTS -->
+<div class="grid-2" id="payments" data-section="payments">
+
+  <!-- PAYMENTS -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">💳 Maintenance Payments</span>
+      <a href="{% url 'payment_list' %}" class="panel-link">View all →</a>
+    </div>
+    <div class="panel-body">
+      {% if pending_payments %}
+        {% with p=pending_payments.0 %}
+        <div class="pay-card">
+          <div class="pay-lbl">Outstanding Balance</div>
+          <div class="pay-amt"><em>₹</em>{{ p.amount }}</div>
+          <div style="margin:1rem 0">
+            <div class="pay-row"><span class="pay-key">Month</span><span class="pay-val">{{ p.month }}</span></div>
+            <div class="pay-row"><span class="pay-key">Status</span><span class="pay-val" style="color:#e67e22">{{ p.payment_status }}</span></div>
+          </div>
+          <a href="{% url 'pay_maintenance' p.id %}" class="btn-gold btn-full"
+             style="display:block;text-align:center;text-decoration:none;padding:0.75rem;border-radius:9px;">
+            Pay Now →
+          </a>
+        </div>
+        {% endwith %}
+      {% else %}
+        <div class="empty-state"><div class="empty-icon">✅</div><p>No pending payments. All dues cleared!</p></div>
+      {% endif %}
+
+      {% for payment in all_payments|slice:":4" %}
+      <div class="list-item">
+        <div class="item-av" style="background:linear-gradient(135deg,{% if payment.payment_status == 'Paid' %}#0f7b6c,#27ae60{% else %}#e67e22,#f39c12{% endif %})">
+          {{ payment.month|slice:":3"|upper }}
+        </div>
+        <div class="item-body">
+          <div class="item-name">{{ payment.month }}</div>
+          <div class="item-meta">{% if payment.payment_date %}Paid {{ payment.payment_date }}{% else %}Not paid yet{% endif %}</div>
+        </div>
+        <div class="item-right">
+          <div class="item-amount {% if payment.payment_status == 'Paid' %}amount-paid{% else %}amount-pending{% endif %}">₹{{ payment.amount }}</div>
+          <span class="badge {% if payment.payment_status == 'Paid' %}badge-paid{% else %}badge-pending{% endif %}">{{ payment.payment_status }}</span>
+        </div>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">💳</div><p>No payment records found.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- COMPLAINTS -->
+  <div class="panel" id="complaints" data-section="complaints">
+    <div class="panel-head">
+      <span class="panel-title">🛠️ My Complaints</span>
+      <a href="{% url 'complaint_list' %}" class="panel-link">View all →</a>
+    </div>
+    <div class="panel-body">
+
+      <!-- Complaint Status Tracker (if any open) -->
+      {% if open_complaints %}
+      <div style="margin-bottom:1rem;padding:0.8rem 1rem;background:rgba(230,126,34,0.07);
+                  border:1px solid rgba(230,126,34,0.2);border-radius:10px;">
+        <div style="font-size:0.7rem;font-weight:700;color:#e67e22;margin-bottom:0.6rem;">
+          ⚠ {{ open_complaints|length }} open complaint(s)
+        </div>
+        {% for c in open_complaints|slice:":2" %}
+        <div style="font-size:0.78rem;margin-bottom:4px;">
+          <span style="font-weight:600;">{{ c.complaint_type }}</span>
+          <span style="color:var(--muted);font-size:0.7rem;"> — {{ c.description|truncatechars:35 }}</span>
+        </div>
+        <!-- Status flow -->
+        <div style="display:flex;align-items:center;gap:4px;margin-top:5px;margin-bottom:4px;">
+          <span style="font-size:0.65rem;padding:2px 8px;border-radius:5px;
+            {% if c.status == 'Pending' %}background:rgba(230,126,34,0.15);color:#e67e22;font-weight:700;
+            {% else %}background:rgba(0,0,0,0.05);color:var(--muted);{% endif %}">Pending</span>
+          <span style="font-size:0.5rem;color:var(--muted);">→</span>
+          <span style="font-size:0.65rem;padding:2px 8px;border-radius:5px;
+            {% if c.status == 'In Progress' %}background:rgba(41,98,255,0.12);color:#4a7cff;font-weight:700;
+            {% else %}background:rgba(0,0,0,0.05);color:var(--muted);{% endif %}">In Progress</span>
+          <span style="font-size:0.5rem;color:var(--muted);">→</span>
+          <span style="font-size:0.65rem;padding:2px 8px;border-radius:5px;
+            {% if c.status == 'Resolved' %}background:rgba(15,123,108,0.12);color:var(--teal);font-weight:700;
+            {% else %}background:rgba(0,0,0,0.05);color:var(--muted);{% endif %}">Resolved</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% for complaint in my_complaints|slice:":3" %}
+      <div class="list-item">
+        <div class="item-ico {% if complaint.complaint_type == 'Plumbing' %}ico-blue{% elif complaint.complaint_type == 'Electrical' %}ico-gold{% else %}ico-teal{% endif %}">
+          {% if complaint.complaint_type == 'Plumbing' %}🔧{% elif complaint.complaint_type == 'Electrical' %}💡{% else %}📝{% endif %}
+        </div>
+        <div class="item-body">
+          <div class="item-name">{{ complaint.complaint_type }}</div>
+          <div class="item-meta">{{ complaint.description|truncatechars:38 }} · {{ complaint.complaint_date }}</div>
+        </div>
+        <span class="badge {% if complaint.status == 'Resolved' %}badge-resolved{% elif complaint.status == 'In Progress' %}badge-inprogress{% else %}badge-open{% endif %}">
+          {{ complaint.status }}
+        </span>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">🛠️</div><p>No complaints raised yet.</p></div>
+      {% endfor %}
+
+      <div class="panel-divider"></div>
+
+      <!-- Add Complaint Form (inline) -->
+      <div class="panel-sub-title">➕ Raise a Complaint</div>
+      <form method="POST" action="{% url 'resident_dashboard' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_complaint"/>
+        <div class="fg">
+          <label>Type</label>
+          <select name="complaint_type" required>
+            <option value="">Select type</option>
+            <option value="Plumbing">🔧 Plumbing</option>
+            <option value="Electrical">💡 Electrical</option>
+            <option value="Cleaning">🧹 Cleaning</option>
+            <option value="Security">🛡️ Security</option>
+            <option value="Other">📝 Other</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Description</label>
+          <textarea name="description" rows="2" placeholder="Describe your issue..." required></textarea>
+        </div>
+        <button type="submit" class="btn-teal btn-full">Submit Complaint</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 2: VISITORS + FACILITIES -->
+<div class="grid-2" id="visitors" data-section="visitors">
+
+  <!-- VISITORS -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">🔔 Visitor Management</span>
+      <a href="{% url 'visitor_list' %}" class="panel-link">View all →</a>
+    </div>
+    <div class="panel-body">
+
+      <!-- Pending approval banner -->
+      {% if pending_visitor_count %}
+      <div style="background:rgba(233,168,50,0.1);border:1px solid rgba(233,168,50,0.35);
+                  border-radius:9px;padding:0.7rem 1rem;margin-bottom:1rem;">
+        <span style="font-size:0.75rem;font-weight:700;color:var(--gold);">
+          ⚠ {{ pending_visitor_count }} visitor(s) awaiting your approval
+        </span>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">
+          Approve to generate OTP → share with visitor → security verifies at gate
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Visitor list with inline approve/reject -->
+      {% for visitor in visitor_requests|slice:":5" %}
+      <div class="list-item" style="align-items:flex-start;flex-wrap:wrap;gap:0.4rem;">
+        <div class="item-av" style="background:linear-gradient(135deg,#0f7b6c,#c9a84c);flex-shrink:0;">
+          {{ visitor.visitor_name|slice:":2"|upper }}
+        </div>
+        <div class="item-body">
+          <div class="item-name">{{ visitor.visitor_name }}</div>
+          <div class="item-meta">{{ visitor.visitor_type }} · {{ visitor.entry_time|date:"d M, h:i A" }}</div>
+          {% if visitor.approval_status == 'Approved' and visitor.otp %}
+          <div style="margin-top:4px;font-size:0.72rem;color:var(--muted);">
+            OTP: <span style="font-family:monospace;font-weight:700;letter-spacing:0.15em;
+                              color:var(--teal);border:1px solid var(--teal);border-radius:5px;
+                              padding:1px 7px;">{{ visitor.otp }}</span>
+            <span style="margin-left:4px;font-size:0.65rem;color:var(--muted);">— share with visitor</span>
+          </div>
+          {% endif %}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+          <span class="badge {% if visitor.approval_status == 'Approved' %}badge-approved{% elif visitor.approval_status == 'Rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+            {{ visitor.approval_status }}
+          </span>
+          {% if visitor.approval_status == 'Pending' %}
+          <div style="display:flex;gap:4px;">
+            <form method="POST" action="{% url 'approve_visitor' visitor.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="approve"/>
+              <button type="submit" class="btn-approve" style="font-size:0.72rem;padding:3px 9px;">✓ Approve</button>
+            </form>
+            <form method="POST" action="{% url 'approve_visitor' visitor.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="reject"/>
+              <button type="submit" class="btn-reject" style="font-size:0.72rem;padding:3px 9px;">✗ Reject</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">🔔</div><p>No visitor records yet.</p></div>
+      {% endfor %}
+
+      <div class="panel-divider"></div>
+
+      <!-- Pre-Approve Form -->
+      <div class="panel-sub-title">Pre-Approve a Visitor</div>
+      <form method="POST" action="{% url 'resident_dashboard' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_visitor"/>
+        <div class="fg">
+          <label>Visitor Name</label>
+          <input type="text" name="visitor_name" placeholder="Full name" required/>
+        </div>
+        <div class="fg">
+          <label>Visitor Type</label>
+          <select name="visitor_type" required>
+            <option value="">Select type</option>
+            <option value="Guest">👤 Guest</option>
+            <option value="Delivery">📦 Delivery</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-teal btn-full">Pre-Approve &amp; Generate OTP</button>
+      </form>
+
+      {% if new_otp %}
+      <div style="margin-top:1rem;background:rgba(15,123,108,0.07);border:2px dashed rgba(15,123,108,0.3);
+                  border-radius:12px;padding:1.2rem;text-align:center;">
+        <div style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">One-Time Access Code</div>
+        <div style="font-size:2.4rem;font-weight:700;letter-spacing:0.28em;color:var(--teal);font-family:monospace;margin:4px 0;">
+          {{ new_otp }}
+        </div>
+        <div style="font-size:0.72rem;color:var(--muted);">
+          Valid 24 hrs · Share with <strong>{{ new_visitor_name }}</strong>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- FACILITIES -->
+  <div class="panel" id="facilities" data-section="facilities">
+    <div class="panel-head">
+      <span class="panel-title">🏊 Book a Facility</span>
+      <a href="{% url 'facility_list' %}" class="panel-link">View all →</a>
+    </div>
+    <div class="panel-body">
+
+      <!-- Facility grid -->
+      <div class="fac-grid" style="margin-bottom:1rem;">
+        {% for facility in facilities %}
+        <div class="fac-card {% if facility.availability == 'Not Available' %}fac-card-disabled{% endif %}"
+             onclick="selectFacility('{{ facility.id }}', '{{ facility.facility_name }}')">
+          <div class="fac-icon">
+            {% if 'pool' in facility.facility_name|lower or 'swim' in facility.facility_name|lower %}🏊
+            {% elif 'gym' in facility.facility_name|lower %}🏋️
+            {% elif 'hall' in facility.facility_name|lower %}🎉
+            {% elif 'court' in facility.facility_name|lower or 'badminton' in facility.facility_name|lower %}🏸
+            {% elif 'garden' in facility.facility_name|lower %}🌿
+            {% else %}🏟️{% endif %}
+          </div>
+          <div class="fac-name">{{ facility.facility_name }}</div>
+          <div class="fac-fee">₹{{ facility.booking_fee }}/slot</div>
+          <div class="fac-avail {% if facility.availability == 'Not Available' %}fac-na{% endif %}">
+            {{ facility.availability }}
+          </div>
+        </div>
+        {% empty %}
+          <div class="empty-state" style="grid-column:1/-1"><p>No facilities listed.</p></div>
+        {% endfor %}
+      </div>
+
+      <!-- Booking form (inline) -->
+      <div class="panel-sub-title">📅 Book Selected Facility</div>
+      <form method="POST" action="{% url 'resident_dashboard' %}" id="bookingForm">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="book_facility"/>
+        <div class="fg">
+          <label>Facility</label>
+          <select name="facility_id" id="facilitySelect" required>
+            <option value="">Click a facility above or select</option>
+            {% for facility in facilities %}
+            {% if facility.availability != 'Not Available' %}
+            <option value="{{ facility.id }}">{{ facility.facility_name }} — ₹{{ facility.booking_fee }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="fg">
+          <label>Date</label>
+          <input type="date" name="booking_date" id="bookingDate" required
+                 min="{{ today|date:'Y-m-d' }}"/>
+        </div>
+        <button type="submit" class="btn-gold btn-full">Confirm Booking →</button>
+      </form>
+
+      <!-- My Bookings -->
+      {% if my_bookings %}
+      <div class="panel-divider"></div>
+      <div class="panel-sub-title">My Bookings</div>
+      {% for booking in my_bookings|slice:":3" %}
+      <div class="list-item">
+        <div class="item-ico ico-teal">🏟️</div>
+        <div class="item-body">
+          <div class="item-name">{{ booking.facility.facility_name }}</div>
+          <div class="item-meta">{{ booking.booking_date }}</div>
+        </div>
+        <span class="badge {% if booking.payment_status == 'Paid' %}badge-paid{% else %}badge-pending{% endif %}">
+          {{ booking.payment_status }}
+        </span>
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ROW 3: NOTICES + EMERGENCY -->
+<div class="grid-2" id="notices" data-section="notices">
+
+  <!-- NOTICES -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">📋 Notice Board</span>
+      <a href="{% url 'notice_list' %}" class="panel-link">View all →</a>
+    </div>
+    <div class="panel-body">
+      {% for notice in notices|slice:":5" %}
+      <div class="notice-item">
+        <div class="notice-row">
+          <span class="n-tag t-gen">Notice</span>
+          <span class="notice-date">{{ notice.posted_date|date:"d M Y" }}</span>
+        </div>
+        <div class="notice-title">{{ notice.title }}</div>
+        <div class="notice-body">{{ notice.message|truncatechars:90 }}</div>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">📋</div><p>No notices posted yet.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- EMERGENCY -->
+  <div class="panel" id="emergency" data-section="emergency">
+    <div class="panel-head">
+      <span class="panel-title">🚨 Emergency</span>
+      <a href="{% url 'alert_panel' %}" class="panel-link">View alerts →</a>
+    </div>
+    <div class="panel-body">
+      <div class="em-grid">
+        <a class="em-btn em-fire"   href="tel:101"><div class="em-icon">🔥</div><div class="em-title">Fire Brigade</div><div class="em-num">101</div></a>
+        <a class="em-btn em-police" href="tel:100"><div class="em-icon">🚔</div><div class="em-title">Police</div><div class="em-num">100</div></a>
+        <a class="em-btn em-med"    href="tel:108"><div class="em-icon">🚑</div><div class="em-title">Ambulance</div><div class="em-num">108</div></a>
+        <a class="em-btn em-sec"    href="#"><div class="em-icon">🛡️</div><div class="em-title">Security</div><div class="em-num">Ring Gate</div></a>
+      </div>
+      <div class="panel-sub-title" style="margin-top:0.8rem;">Recent Alerts</div>
+      {% for alert in emergency_alerts|slice:":3" %}
+      <div class="alert-item">
+        <div class="alert-dot {% if alert.alert_type == 'Fire' %}dot-r{% elif alert.alert_type == 'Medical' %}dot-g{% else %}dot-y{% endif %}"></div>
+        <div>
+          <div class="alert-name">{{ alert.alert_type }} — {{ alert.message|truncatechars:42 }}</div>
+          <div class="alert-meta">{{ alert.alert_date|date:"d M Y, h:i A" }}</div>
+        </div>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">✅</div><p>No recent alerts.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectFacility(id, name) {
+  const sel = document.getElementById('facilitySelect');
+  if (sel) {
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value == id) { sel.selectedIndex = i; break; }
+    }
+  }
+  document.querySelectorAll('.fac-card').forEach(c => c.style.borderColor = '');
+  event.currentTarget.style.borderColor = 'var(--gold)';
+}
+// Set min date for booking
+const bd = document.getElementById('bookingDate');
+if (bd) bd.min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

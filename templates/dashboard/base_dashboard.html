@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}eSociety{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}"/>
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+<!-- ── NAV ── -->
+<nav class="dash-nav {% block nav_class %}{% endblock %}">
+  <a class="nav-logo" href="{% url 'home' %}">
+    <div class="nav-logo-icon {% block logo_icon_class %}resident-icon{% endblock %}">
+      {% block logo_icon %}🏛️{% endblock %}
+    </div>
+    <span class="nav-logo-name"><em>e</em>Society</span>
+  </a>
+
+  <div class="nav-center">
+    <div class="nav-clock" id="navClock"></div>
+  </div>
+
+  <div class="nav-right">
+    <span class="nav-role-badge {% block role_badge_class %}resident{% endblock %}">
+      {% block role_badge_label %}🏠 Resident{% endblock %}
+    </span>
+    <div class="nav-user">
+      <div class="nav-user-av {% block user_av_class %}resident-av{% endblock %}">
+        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+      </div>
+      <div>
+        <div class="nav-user-name">{{ user.first_name }} {{ user.last_name }}</div>
+        <div class="nav-user-role">{{ user.email }}</div>
+      </div>
+    </div>
+    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+  </div>
+</nav>
+
+<!-- ── LAYOUT ── -->
+<div class="dash-layout">
+
+  <!-- ── SIDEBAR ── -->
+  {% comment %} <aside class="dash-sidebar">
+    {% block sidebar %}{% endblock %}
+  </aside> {% endcomment %}
+
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="dash-sidebar">
+    {% if user.role == "resident" %}
+
+      <div class="sb-section">My Portal</div>
+      <a href="{% url 'resident_dashboard' %}" class="sb-link {% if request.resolver_match.url_name == 'resident_dashboard' %}active{% endif %}">
+        <span class="sb-icon">🏠</span> Dashboard
+      </a>
+      <a href="{% url 'visitor_list' %}" class="sb-link {% if request.resolver_match.url_name == 'visitor_list' %}active{% endif %}">
+        <span class="sb-icon">🔔</span> Visitors
+        {% if pending_visitor_count %}<span class="sb-badge">{{ pending_visitor_count }}</span>{% endif %}
+      </a>
+      <a href="{% url 'complaint_list' %}" class="sb-link {% if request.resolver_match.url_name == 'complaint_list' %}active{% endif %}">
+        <span class="sb-icon">🛠️</span> Complaints
+        {% if open_complaints %}<span class="sb-badge">{{ open_complaints|length }}</span>{% endif %}
+      </a>
+      <a href="{% url 'facility_list' %}" class="sb-link {% if request.resolver_match.url_name == 'facility_list' %}active{% endif %}">
+        <span class="sb-icon">🏊</span> Facilities
+      </a>
+      <a href="{% url 'booking_list' %}" class="sb-link {% if request.resolver_match.url_name == 'booking_list' %}active{% endif %}">
+        <span class="sb-icon">📅</span> My Bookings
+      </a>
+      <a href="{% url 'payment_list' %}" class="sb-link {% if request.resolver_match.url_name == 'payment_list' %}active{% endif %}">
+        <span class="sb-icon">💳</span> Payments
+        {% if pending_payments %}<span class="sb-badge">{{ pending_payments|length }}</span>{% endif %}
+      </a>
+      <a href="{% url 'notice_list' %}" class="sb-link {% if request.resolver_match.url_name == 'notice_list' %}active{% endif %}">
+        <span class="sb-icon">📋</span> Notices
+      </a>
+      <a href="{% url 'alert_panel' %}" class="sb-link {% if request.resolver_match.url_name == 'alert_panel' %}active{% endif %}">
+        <span class="sb-icon">🚨</span> Alerts
+      </a>
+      <div class="sb-section">Account</div>
+      <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+
+    {% elif user.role == "security" %}
+
+      <div class="sb-section">Gate Control</div>
+      <a href="{% url 'security_dashboard' %}" class="sb-link {% if request.resolver_match.url_name == 'security_dashboard' %}active security{% endif %}">
+        <span class="sb-icon">🛡️</span> Dashboard
+      </a>
+      <a href="#visitors" class="sb-link {% if request.resolver_match.url_name == 'visitor_list' %}active{% endif %}">
+        <span class="sb-icon">🔔</span> Visitor Log
+        {% if pending_visitors %}<span class="sb-badge">{{ pending_visitors|length }}</span>{% endif %}
+      </a>
+      <a href="{% url 'add_visitor' %}" class="sb-link active"><span class="sb-icon">➕</span> Add Visitor</a>
+
+      {% comment %} <a href="#entry" class="sb-link"><span class="sb-icon">➕</span> Log Entry</a> {% endcomment %}
+      {% comment %} <a href="#emergency" class="sb-link"><span class="sb-icon">🚨</span> Emergency</a> {% endcomment %}
+
+      <div class="sb-section">Read Only</div>
+      <a href="{% url 'complaint_list' %}" class="sb-link {% if request.resolver_match.url_name == 'complaint_list' %}active{% endif %}">
+        <span class="sb-icon">🛠️</span> Complaints
+      </a>
+      <a href="{% url 'notice_list' %}" class="sb-link {% if request.resolver_match.url_name == 'notice_list' %}active{% endif %}">
+        <span class="sb-icon">📋</span> Notices
+      </a>
+      <a href="{% url 'visitor_list' %}" class="sb-link {% if request.resolver_match.url_name == 'visitor_list' %}active{% endif %}">
+        <span class="sb-icon">👥</span> All Visitors
+      </a>
+      <a href="{% url 'alert_panel' %}" class="sb-link {% if request.resolver_match.url_name == 'alert_panel' %}active{% endif %}">
+        <span class="sb-icon">🚨</span> Alert Panel
+      </a>
+      <div class="sb-section">Account</div>
+      <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+
+    {% else %}
+      {% block sidebar %}{% endblock %}
+    {% endif %}
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="dash-main">
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+  </main>
+</div>
+
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,48 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Notices — eSociety{% endblock %}
+{% block body_class %}{% if user.role == 'security' %}theme-security{% endif %}{% endblock %}
+{% block nav_class %}{% if user.role == 'security' %}nav-security{% endif %}{% endblock %}
+{% block role_badge_class %}{% if user.role == 'security' %}security{% else %}resident{% endif %}{% endblock %}
+{% block role_badge_label %}{% if user.role == 'security' %}🛡️ Security{% else %}🏠 Resident{% endif %}{% endblock %}
+{% block user_av_class %}{% if user.role == 'security' %}security-av{% else %}resident-av{% endif %}{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  {% if user.role == 'security' %}<a href="{% url 'security_dashboard' %}" class="sb-link"><span class="sb-icon">🛡️</span> Dashboard</a>
+  {% else %}<a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>{% endif %}
+  <a href="{% url 'visitor_list' %}"   class="sb-link"><span class="sb-icon">👥</span> Visitors</a>
+  <a href="{% url 'complaint_list' %}" class="sb-link"><span class="sb-icon">🛠️</span> Complaints</a>
+  <a href="{% url 'notice_list' %}"    class="sb-link active"><span class="sb-icon">📋</span> Notices</a>
+  {% if user.role == 'admin' %}<a href="{% url 'add_notice' %}" class="sb-link"><span class="sb-icon">➕</span> Add Notice</a>{% endif %}
+  <a href="{% url 'alert_panel' %}"    class="sb-link"><span class="sb-icon">🚨</span> Alerts</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>📋 Notice Board</h1>
+    <p>Society announcements and updates</p>
+  </div>
+  {% if user.role == 'admin' %}<a href="{% url 'add_notice' %}" class="btn-teal">+ Post Notice</a>{% endif %}
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.2rem;">
+  {% for notice in notices %}
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">{{ notice.title }}</span>
+      <span class="notice-date">{{ notice.posted_date|date:"d M Y" }}</span>
+    </div>
+    <div class="panel-body">
+      <p style="font-size:0.85rem;line-height:1.7;color:{% if user.role == 'security' %}rgba(255,255,255,0.62){% else %}var(--body){% endif %}">
+        {{ notice.message }}
+      </p>
+    </div>
+  </div>
+  {% empty %}
+    <div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📋</div><p>No notices posted yet.</p></div>
+  {% endfor %}
+</div>
+{% endblock %}

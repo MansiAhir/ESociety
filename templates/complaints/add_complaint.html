@@ -1,0 +1,46 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Raise Complaint — eSociety{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  <a href="{% url 'complaint_list' %}"     class="sb-link"><span class="sb-icon">🛠️</span> Complaints</a>
+  <a href="{% url 'add_complaint' %}"      class="sb-link active"><span class="sb-icon">➕</span> Add Complaint</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>🛠️ Raise a Complaint</h1>
+    <p>Submit an issue and track its resolution</p>
+  </div>
+  <a href="{% url 'complaint_list' %}" class="btn-outline-gold">← Back to List</a>
+</div>
+
+<div style="max-width:600px">
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Complaint Details</span></div>
+    <div class="panel-body">
+      <form method="POST" action="{% url 'raise_complaint' %}">
+        {% csrf_token %}
+        <div class="fg">
+          <label>Category</label>
+          <select name="complaint_type" required>
+            <option value="">Select category</option>
+            <option value="Plumbing">🔧 Plumbing</option>
+            <option value="Electrical">💡 Electrical</option>
+            <option value="Other">📝 Other</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Description</label>
+          <textarea name="description" rows="4" placeholder="Describe the issue in detail..." required></textarea>
+        </div>
+        <button type="submit" class="btn-teal btn-full">Submit Complaint</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

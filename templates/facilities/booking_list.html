@@ -1,0 +1,141 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}All Bookings — eSociety{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  <a href="{% url 'visitor_list' %}"   class="sb-link"><span class="sb-icon">👥</span> Visitors</a>
+  <a href="{% url 'complaint_list' %}" class="sb-link"><span class="sb-icon">🛠️</span> Complaints</a>
+  <a href="{% url 'facility_list' %}"  class="sb-link"><span class="sb-icon">🏊</span> Facilities</a>
+  <a href="{% url 'booking_list' %}" class="sb-link active"><span class="sb-icon">📅</span> My Bookings</a>
+  <a href="{% url 'book_facility' %}"  class="sb-link active"><span class="sb-icon">📅</span> Book Facility</a>
+  <a href="{% url 'payment_list' %}"   class="sb-link"><span class="sb-icon">💳</span> Payments</a>
+  <a href="{% url 'notice_list' %}"    class="sb-link"><span class="sb-icon">📋</span> Notices</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>📅 My Bookings</h1>
+    <p>Your facility reservation history</p>
+  </div>
+  <a href="{% url 'book_facility' %}" class="btn-teal">+ New Booking</a>
+</div>
+
+<!-- Summary Cards -->
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
+
+  <div class="panel" style="text-align:center;padding:1.2rem 1rem;">
+    <div style="font-size:1.8rem;margin-bottom:0.4rem;">📋</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--dark);">{{ my_bookings|length }}</div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Total Bookings</div>
+  </div>
+
+  <div class="panel" style="text-align:center;padding:1.2rem 1rem;">
+    <div style="font-size:1.8rem;margin-bottom:0.4rem;">✅</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--dark);">
+      {{ my_bookings|dictsortreversed:"payment_status"|length }}
+    </div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Paid</div>
+  </div>
+
+  <div class="panel" style="text-align:center;padding:1.2rem 1rem;">
+    <div style="font-size:1.8rem;margin-bottom:0.4rem;">⏳</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--dark);">
+      {% with unpaid_count=0 %}
+        {% for b in my_bookings %}{% if b.payment_status == 'Unpaid' %}{% with unpaid_count=unpaid_count|add:1 %}{% endwith %}{% endif %}{% endfor %}
+        {{ my_bookings|length }}
+      {% endwith %}
+    </div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Pending Payment</div>
+  </div>
+
+  <div class="panel" style="text-align:center;padding:1.2rem 1rem;">
+    <div style="font-size:1.8rem;margin-bottom:0.4rem;">🏊</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--dark);">
+      {{ facilities|length }}
+    </div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Facilities</div>
+  </div>
+
+</div>
+
+<!-- Bookings Table -->
+<div class="panel">
+  <div class="panel-head">
+    <span class="panel-title">📅 Booking History</span>
+    <span style="font-size:0.75rem;color:var(--muted);">{{ my_bookings|length }} record{{ my_bookings|length|pluralize }}</span>
+  </div>
+  <div class="panel-body" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Facility</th>
+          <th>Booking Date</th>
+          <th>Time</th>
+          <th>Fee</th>
+          <th>Payment</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in my_bookings %}
+        <tr>
+          <td style="color:var(--muted);font-size:0.8rem;">{{ forloop.counter }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              {% comment %} <span style="font-size:1.2rem;">
+                {% if 'pool' in booking.facility.facility_name|lower or 'swim' in booking.facility.facility_name|lower %}🏊
+                {% elif 'gym' in booking.facility.facility_name|lower %}🏋️
+                {% elif 'hall' in booking.facility.facility_name|lower or 'club' in booking.facility.facility_name|lower %}🎉
+                {% elif 'court' in booking.facility.facility_name|lower or 'badminton' in booking.facility.facility_name|lower %}🏸
+                {% elif 'garden' in booking.facility.facility_name|lower %}🌿
+                {% else %}🏟️{% endif %}
+              </span> {% endcomment %}
+              <span style="font-size:1.2rem;">{{ booking.facility.emoji|default:"🏟️" }}</span>
+              <span style="font-weight:600;">{{ booking.facility.facility_name }}</span>
+            </div>
+          </td>
+          <td>{{ booking.booking_date|date:"d M Y" }}</td>
+          <td>
+            {% if booking.start_time and booking.end_time %}
+              ⏰ {{ booking.start_time|time:"h:i A" }} - {{ booking.end_time|time:"h:i A" }}
+            {% else %}
+              <span style="color:#aaa;">Not set</span>
+            {% endif %}
+          </td>
+          {% comment %} <td>⏰ {{ booking.start_time|time:"h:i A" }} - {{ booking.end_time|time:"h:i A" }}</td> {% endcomment %}
+          <td style="font-weight:600;color:var(--teal);">₹{{ booking.facility.booking_fee }}</td>
+          <td>
+            <span class="badge {% if booking.payment_status == 'Paid' %}badge-paid{% else %}badge-pending{% endif %}">
+              {{ booking.payment_status }}
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'book_facility' %}?facility={{ booking.facility.id }}" 
+               style="font-size:0.78rem;color:var(--teal);font-weight:600;text-decoration:none;">
+              Book Again
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <div class="empty-icon">📅</div>
+              <p>No bookings yet.</p>
+              <a href="{% url 'book_facility' %}" class="btn-teal" style="margin-top:0.8rem;display:inline-block;">Book a Facility</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

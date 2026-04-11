@@ -1,0 +1,59 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Post Notice — eSociety{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  <a href="{% url 'notice_list' %}"        class="sb-link"><span class="sb-icon">📋</span> All Notices</a>
+  <a href="{% url 'add_notice' %}"         class="sb-link active"><span class="sb-icon">➕</span> Post Notice</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>📣 Post a Notice</h1>
+    <p>Broadcast an announcement to all residents</p>
+  </div>
+  <a href="{% url 'notice_list' %}" class="btn-outline-gold">← Back to Notices</a>
+</div>
+
+<div style="max-width:620px">
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Notice Details</span></div>
+    <div class="panel-body">
+      <form method="POST" action="{% url 'add_notice' %}">
+        {% csrf_token %}
+        <div class="fg">
+          <label>Notice Title</label>
+          <input type="text" name="title" placeholder="e.g. Water Supply Interruption — 20 March" required/>
+        </div>
+        <div class="fg">
+          <label>Message</label>
+          <textarea name="message" rows="5" placeholder="Write the full notice message here..." required></textarea>
+        </div>
+        <button type="submit" class="btn-teal btn-full">Post Notice</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Recent notices preview -->
+  {% if recent_notices %}
+  <div style="margin-top:1.5rem">
+    <div style="font-size:0.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem;">Recently Posted</div>
+    {% for notice in recent_notices|slice:":3" %}
+    <div class="panel" style="margin-bottom:0.8rem">
+      <div class="panel-head">
+        <span class="panel-title">{{ notice.title }}</span>
+        <span style="font-size:0.65rem;color:var(--muted)">{{ notice.posted_date|date:"d M Y" }}</span>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:0.82rem;color:var(--body);line-height:1.6">{{ notice.message|truncatechars:120 }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

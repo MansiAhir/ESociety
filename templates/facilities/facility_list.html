@@ -1,0 +1,72 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Facilities — eSociety{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  <a href="{% url 'visitor_list' %}"   class="sb-link"><span class="sb-icon">👥</span> Visitors</a>
+  <a href="{% url 'complaint_list' %}" class="sb-link"><span class="sb-icon">🛠️</span> Complaints</a>
+  <a href="{% url 'facility_list' %}"  class="sb-link active"><span class="sb-icon">🏊</span> Facilities</a>
+  <a href="{% url 'book_facility' %}"  class="sb-link"><span class="sb-icon">📅</span> Book Facility</a>
+  <a href="{% url 'payment_list' %}"   class="sb-link"><span class="sb-icon">💳</span> Payments</a>
+  <a href="{% url 'notice_list' %}"    class="sb-link"><span class="sb-icon">📋</span> Notices</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>🏊 Facilities</h1>
+    <p>Available amenities and booking status</p>
+  </div>
+  <a href="{% url 'book_facility' %}" class="btn-teal">+ Book a Facility</a>
+</div>
+
+<!-- Facility cards -->
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem;margin-bottom:2rem;">
+  {% for facility in facilities %}
+  <div class="panel" style="text-align:center;padding:1.5rem 1rem;cursor:pointer" onclick="window.location='{% url 'book_facility' %}?facility={{ facility.id }}'">
+    {% comment %} <div style="font-size:2.5rem;margin-bottom:0.7rem">
+      {% if 'pool' in facility.facility_name|lower or 'swim' in facility.facility_name|lower %}🏊
+      {% elif 'gym' in facility.facility_name|lower %}🏋️
+      {% elif 'hall' in facility.facility_name|lower or 'club' in facility.facility_name|lower %}🎉
+      {% elif 'court' in facility.facility_name|lower or 'badminton' in facility.facility_name|lower %}🏸
+      {% elif 'garden' in facility.facility_name|lower %}🌿
+      {% else %}🏟️{% endif %}
+    </div> {% endcomment %}
+      <div style="font-size:2.5rem;margin-bottom:0.7rem">{{ facility.emoji|default:"🏟️" }}</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--dark);font-weight:700;margin-bottom:4px">{{ facility.facility_name }}</div>
+    <div style="font-size:0.78rem;color:var(--teal);font-weight:600;margin-bottom:6px">₹{{ facility.booking_fee }} / Month</div>
+    <span class="badge {% if facility.availability == 'Available' %}badge-avail{% else %}badge-na{% endif %}">{{ facility.availability }}</span>
+  </div>
+  {% empty %}
+    <div class="empty-state"><div class="empty-icon">🏟️</div><p>No facilities listed yet.</p></div>
+  {% endfor %}
+</div>
+
+<!-- My Bookings Table -->
+<div class="panel">
+  <div class="panel-head"><span class="panel-title">📅 My Bookings</span></div>
+  <div class="panel-body" style="padding:0">
+    <table class="data-table">
+      <thead>
+        <tr><th>#</th><th>Facility</th><th>Booking Date</th><th>Fee</th><th>Payment</th></tr>
+      </thead>
+      <tbody>
+        {% for booking in my_bookings %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td style="font-weight:600">{{ booking.facility.facility_name }}</td>
+          <td>{{ booking.booking_date|date:"d M Y" }}</td>
+          <td>₹{{ booking.facility.booking_fee }}</td>
+          <td><span class="badge {% if booking.payment_status == 'Paid' %}badge-paid{% else %}badge-pending{% endif %}">{{ booking.payment_status }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--muted)">No bookings yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

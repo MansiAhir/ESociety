@@ -1,0 +1,79 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Create Bills — Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>🧾 Create Maintenance Bills</h1>
+    <p>Generate monthly dues for all residents</p>
+  </div>
+</div>
+
+{% if messages %}
+  {% for msg in messages %}
+    <div style="background:#e6f4ea;color:#1D6B35;padding:0.8rem 1.25rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem;">{{ msg }}</div>
+  {% endfor %}
+{% endif %}
+
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;">
+
+  <!-- Bill Generation Form -->
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Generate Bills</span></div>
+    <div class="panel-body">
+      <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:0.4rem;">Month</label>
+          <input type="text" name="month" placeholder="e.g. April 2026" required
+            style="width:100%;padding:0.6rem 0.8rem;border-radius:7px;border:1.5px solid var(--border);background:var(--input-bg);font-size:0.9rem;">
+        </div>
+        <div style="margin-bottom:1.25rem;">
+          <label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:0.4rem;">Amount (₹)</label>
+          <input type="number" name="amount" placeholder="e.g. 2500" required min="1"
+            style="width:100%;padding:0.6rem 0.8rem;border-radius:7px;border:1.5px solid var(--border);background:var(--input-bg);font-size:0.9rem;">
+        </div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">
+          Bills will be created for <strong>{{ residents.count }} resident(s)</strong>. 
+          Duplicate bills for the same month are skipped.
+        </p>
+        <button type="submit"
+          style="width:100%;padding:0.75rem;background:linear-gradient(135deg,var(--gold),var(--gold-light));
+                 color:var(--dark);border:none;border-radius:9px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+          Generate Bills →
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Recent Bills Table -->
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">Recent Bills</span></div>
+    <div class="panel-body" style="padding:0">
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th><th>Resident</th><th>Month</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for bill in recent_bills %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ bill.resident.email }}</td>
+            <td>{{ bill.month }}</td>
+            <td>₹{{ bill.amount }}</td>
+            <td>
+              <span class="badge {% if bill.payment_status == 'Paid' %}badge-paid{% else %}badge-pending{% endif %}">
+                {{ bill.payment_status }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--muted)">No bills yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% comment %}
+  auth_verify_otp.html — Step 2: user types the 6-digit OTP sent to their email.
+{% endcomment %}
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify OTP — eSociety</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}"/>
+</head>
+<body>
+
+<nav>
+  <a href="{% url 'home' %}" class="nav-logo">
+    <div class="logo-icon">🏛️</div>
+    <span class="logo-name"><em>e</em>Society</span>
+  </a>
+  <div class="nav-actions">
+    <a href="{% url 'login' %}"  class="btn-nav btn-out">Login</a>
+    <a href="{% url 'signup' %}" class="btn-nav btn-sol">Sign Up</a>
+  </div>
+</nav>
+
+<div class="auth-wrapper">
+
+  <div class="auth-left">
+    <div class="auth-badge"><span class="pulse"></span>Account Recovery</div>
+    <h1>Verify Your<br/><span>Identity</span></h1>
+    <p>We've sent a secure one-time password to your email. Enter it to continue your password reset.</p>
+
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-num done">✓</div>
+        <div>
+          <div class="step-title done-text">Email entered</div>
+          <div class="step-desc">Your registered email address was verified.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num active">2</div>
+        <div>
+          <div class="step-title">Verify OTP</div>
+          <div class="step-desc">Enter the 6-digit code from your email. Valid for 10 minutes.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num pending">3</div>
+        <div>
+          <div class="step-title muted">Set new password</div>
+          <div class="step-desc">Choose a strong new password and you're back in.</div>
+        </div>
+      </div>
+    </div>
+
+    {% if email %}
+    <div class="email-chip">
+      <div class="ec-icon">📧</div>
+      <div class="ec-text">OTP sent to <strong>{{ email }}</strong></div>
+    </div>
+    {% endif %}
+
+    <div class="tip-box">
+      <p>💡 Can't find the email? Check your <strong>Spam</strong> or <strong>Junk</strong> folder. The code expires in <strong>10 minutes</strong>.</p>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="card-header">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">Enter OTP</div>
+        <div class="card-sub">
+          We sent a 6-digit code to
+          {% if email %}<strong>{{ email }}</strong>{% else %}your email{% endif %}.
+          It expires in <strong>10 minutes</strong>.
+        </div>
+      </div>
+
+      <!-- Circular countdown -->
+      <div class="timer-ring-wrap">
+        <svg class="timer-ring" width="56" height="56" viewBox="0 0 56 56">
+          <circle class="timer-ring-bg" cx="28" cy="28" r="23"/>
+          <circle class="timer-ring-fill" id="ringFill" cx="28" cy="28" r="23"
+            stroke-dasharray="144.5" stroke-dashoffset="0"/>
+        </svg>
+      </div>
+
+      <form method="post" action="{% url 'verify_otp' %}" novalidate id="otpForm">
+        {% csrf_token %}
+
+        <div class="fg {% if form.otp.errors %}has-error{% endif %}">
+          <label for="{{ form.otp.id_for_label }}">One-Time Password</label>
+          <div class="otp-wrap">
+            {{ form.otp }}
+          </div>
+          {% if form.otp.errors %}
+            <div class="field-error">
+              <span>🔢</span>
+              {% for e in form.otp.errors %}{{ e }}{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="otp-timer">
+          ⏱ OTP valid for <span class="countdown" id="countdown">10:00</span>
+        </div>
+
+        <button type="submit" class="sub-btn" id="verifyBtn">Verify OTP →</button>
+      </form>
+
+      <div class="divider"><span>Didn't receive the code?</span></div>
+      <div class="switch-link">
+        <a href="{% url 'forgot_password' %}">Resend OTP</a> &nbsp;·&nbsp;
+        <a href="{% url 'login' %}">Back to Sign In</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="foot-logo"><em>e</em>Society Management System</div>
+  <div class="foot-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Use</a>
+    <a href="#">Support</a>
+  </div>
+  <div class="foot-copy">© 2024 eSociety · Built for modern residential communities</div>
+</footer>
+
+
+<script src="{% static 'js/auth.js' %}"></script>
+</body>
+</html>

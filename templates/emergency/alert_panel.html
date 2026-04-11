@@ -1,0 +1,182 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Emergency Alerts — eSociety{% endblock %}
+{% block body_class %}{% if user.role == 'security' %}theme-security{% endif %}{% endblock %}
+{% block nav_class %}{% if user.role == 'security' %}nav-security{% endif %}{% endblock %}
+{% block logo_icon_class %}{% if user.role == 'security' %}security-icon{% else %}resident-icon{% endif %}{% endblock %}
+{% block logo_icon %}{% if user.role == 'security' %}🛡️{% else %}🏛️{% endif %}{% endblock %}
+{% block role_badge_class %}{% if user.role == 'security' %}security{% else %}resident{% endif %}{% endblock %}
+{% block role_badge_label %}{% if user.role == 'security' %}🛡️ Security{% else %}🏠 Resident{% endif %}{% endblock %}
+{% block user_av_class %}{% if user.role == 'security' %}security-av{% else %}resident-av{% endif %}{% endblock %}
+
+{% block nav_center %}
+  {% if user.role == 'security' %}
+  <div class="nav-center">
+    <div class="nav-shift-badge"><span class="blink-dot"></span> On Duty</div>
+    <div class="nav-clock" id="liveClock"></div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  {% if user.role == 'security' %}
+    <a href="{% url 'security_dashboard' %}" class="sb-link"><span class="sb-icon">🛡️</span> Dashboard</a>
+  {% else %}
+    <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  {% endif %}
+  <a href="{% url 'visitor_list' %}"   class="sb-link"><span class="sb-icon">👥</span> Visitors</a>
+  <a href="{% url 'complaint_list' %}" class="sb-link"><span class="sb-icon">🛠️</span> Complaints</a>
+  <a href="{% url 'notice_list' %}"    class="sb-link"><span class="sb-icon">📋</span> Notices</a>
+  <a href="{% url 'alert_panel' %}"    class="sb-link active"><span class="sb-icon">🚨</span> Emergency Alerts</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>🚨 Emergency Alert Panel</h1>
+    <p>Quick dial, SOS broadcast and full alert history</p>
+  </div>
+  <span class="status-pill {% if user.role == 'security' %}duty{% else %}live{% endif %}">
+    {% if user.role == 'security' %}🟢 On Duty{% else %}🔔 Monitoring{% endif %}
+  </span>
+</div>
+
+<!-- QUICK DIAL + SOS -->
+<div class="grid-2" style="margin-bottom:1.8rem">
+
+  <!-- Quick Dial -->
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">📞 Quick Dial</span></div>
+    <div class="panel-body">
+      <div class="em-grid">
+        <a class="em-btn em-fire" href="tel:101">
+          <div class="em-icon">🔥</div>
+          <div class="em-title">Fire Brigade</div>
+          <div class="em-num">Dial 101</div>
+        </a>
+        <a class="em-btn em-police" href="tel:100">
+          <div class="em-icon">🚔</div>
+          <div class="em-title">Police</div>
+          <div class="em-num">Dial 100</div>
+        </a>
+        <a class="em-btn em-med" href="tel:108">
+          <div class="em-icon">🚑</div>
+          <div class="em-title">Ambulance</div>
+          <div class="em-num">Dial 108</div>
+        </a>
+        <a class="em-btn em-sec" href="tel:112">
+          <div class="em-icon">🛡️</div>
+          <div class="em-title">Emergency (All)</div>
+          <div class="em-num">Dial 112</div>
+        </a>
+      </div>
+      <button class="sos-btn" id="sosBtn">
+        🚨 BROADCAST SOS TO ALL RESIDENTS
+      </button>
+    </div>
+  </div>
+
+  <!-- Alert Summary Stats -->
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">📊 Alert Summary</span></div>
+    <div class="panel-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;margin-bottom:1rem">
+        <div class="stat-card sc-red" style="margin:0">
+          <div class="sc-lbl">Fire Alerts</div>
+          <div class="sc-val">{{ fire_count|default:"0" }}</div>
+        </div>
+        <div class="stat-card sc-gold" style="margin:0">
+          <div class="sc-lbl">Security Alerts</div>
+          <div class="sc-val">{{ security_count|default:"0" }}</div>
+        </div>
+        <div class="stat-card sc-teal" style="margin:0">
+          <div class="sc-lbl">Medical Alerts</div>
+          <div class="sc-val">{{ medical_count|default:"0" }}</div>
+        </div>
+        <div class="stat-card sc-navy" style="margin:0">
+          <div class="sc-lbl">Total Alerts</div>
+          <div class="sc-val">{{ total_alerts|default:"0" }}</div>
+        </div>
+      </div>
+
+      <!-- Recent 3 alerts -->
+      {% for alert in alerts|slice:":3" %}
+      <div class="alert-item">
+        <div class="alert-dot
+          {% if alert.alert_type == 'Fire' %}dot-r
+          {% elif alert.alert_type == 'Medical' %}dot-g
+          {% else %}dot-y{% endif %}">
+        </div>
+        <div>
+          <div class="alert-name">{{ alert.alert_type }} — {{ alert.message|truncatechars:38 }}</div>
+          <div class="alert-meta">{{ alert.alert_date|date:"d M Y, h:i A" }}</div>
+        </div>
+        <span class="badge badge-{{ alert.alert_type|lower }}" style="margin-left:auto;flex-shrink:0">
+          {{ alert.alert_type }}
+        </span>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">✅</div><p>No alerts on record.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- FULL ALERT HISTORY TABLE -->
+<div class="panel">
+  <div class="panel-head">
+    <span class="panel-title">📜 Full Alert History ({{ alerts|length }})</span>
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:0.4rem">
+      <a href="?type=" style="font-size:0.68rem;padding:3px 10px;border-radius:5px;border:1px solid rgba(0,0,0,0.12);color:var(--muted);text-decoration:none;{% if not request.GET.type %}background:var(--gold);color:var(--dark);border-color:var(--gold);{% endif %}">All</a>
+      <a href="?type=Fire" style="font-size:0.68rem;padding:3px 10px;border-radius:5px;border:1px solid rgba(192,57,43,0.3);color:#e74c3c;text-decoration:none;{% if request.GET.type == 'Fire' %}background:rgba(192,57,43,0.2);{% endif %}">🔥 Fire</a>
+      <a href="?type=Security" style="font-size:0.68rem;padding:3px 10px;border-radius:5px;border:1px solid rgba(201,168,76,0.3);color:var(--gold);text-decoration:none;{% if request.GET.type == 'Security' %}background:rgba(201,168,76,0.1);{% endif %}">🛡️ Security</a>
+      <a href="?type=Medical" style="font-size:0.68rem;padding:3px 10px;border-radius:5px;border:1px solid rgba(15,123,108,0.3);color:var(--teal-light);text-decoration:none;{% if request.GET.type == 'Medical' %}background:rgba(15,123,108,0.1);{% endif %}">🚑 Medical</a>
+    </div>
+  </div>
+  <div class="panel-body" style="padding:0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Type</th>
+          <th>Message</th>
+          <th>Date &amp; Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alert in alerts %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            <span class="badge
+              {% if alert.alert_type == 'Fire' %}badge-fire
+              {% elif alert.alert_type == 'Medical' %}badge-medical
+              {% else %}badge-security{% endif %}">
+              {% if alert.alert_type == 'Fire' %}🔥
+              {% elif alert.alert_type == 'Medical' %}🚑
+              {% else %}🛡️{% endif %}
+              {{ alert.alert_type }}
+            </span>
+          </td>
+          <td>{{ alert.message }}</td>
+          <td>{{ alert.alert_date|date:"d M Y, h:i A" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" style="text-align:center;padding:2.5rem;color:var(--muted)">
+            <div style="font-size:1.5rem;margin-bottom:0.4rem;opacity:0.3">✅</div>
+            No emergency alerts on record.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

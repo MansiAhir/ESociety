@@ -1,0 +1,408 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Security Dashboard — eSociety{% endblock %}
+{% block body_class %}theme-security{% endblock %}
+{% block nav_class %}nav-security{% endblock %}
+{% block logo_icon_class %}security-icon{% endblock %}
+{% block logo_icon %}🛡️{% endblock %}
+{% block role_badge_class %}security{% endblock %}
+{% block role_badge_label %}🛡️ Security Guard{% endblock %}
+{% block user_av_class %}security-av{% endblock %}
+
+{% block nav_center %}
+  <div class="nav-center">
+    <div class="nav-shift-badge"><span class="blink-dot"></span> On Duty</div>
+    <div class="nav-clock" id="liveClock"></div>
+  </div>
+{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Gate Control</div>
+  <a href="#overview"  class="sb-link active security"><span class="sb-icon">🛡️</span> Dashboard</a>
+  <a href="#visitors"  class="sb-link"><span class="sb-icon">🔔</span> Visitor Log
+    {% if pending_visitors %}<span class="sb-badge">{{ pending_visitors|length }}</span>{% endif %}
+  </a>
+  <a href="#entry"     class="sb-link"><span class="sb-icon">➕</span> Log Entry</a>
+  <a href="#emergency" class="sb-link"><span class="sb-icon">🚨</span> Emergency</a>
+
+  <div class="sb-section">Read Only</div>
+  <a href="{% url 'complaint_list' %}" class="sb-link"><span class="sb-icon">🛠️</span> Complaints</a>
+  <a href="{% url 'notice_list' %}"    class="sb-link"><span class="sb-icon">📋</span> Notices</a>
+  <a href="{% url 'visitor_list' %}"   class="sb-link"><span class="sb-icon">👥</span> All Visitors</a>
+  <a href="{% url 'alert_panel' %}"    class="sb-link"><span class="sb-icon">🚨</span> Alert Panel</a>
+
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+
+<!-- ── WELCOME ───────────────────────────────────────────── -->
+<div class="welcome-bar" id="overview" data-section="overview">
+  <div>
+    <h1 class="welcome-title">Guard Post, <span>{{ user.first_name }}!</span></h1>
+    <p class="welcome-sub">Gate monitoring &amp; visitor control &nbsp;·&nbsp; {% now "l, d F Y" %}</p>
+  </div>
+  <span class="status-pill duty">🟢 Shift Active · Gate 1 &amp; 2</span>
+</div>
+
+<!-- ── STAT CARDS ────────────────────────────────────────── -->
+<div class="stat-row">
+  <div class="stat-card sc-purple">
+    <div class="sc-lbl">Today's Visitors</div>
+    <div class="sc-val">{{ total_visitors|default:"0" }}</div>
+    <div class="sc-sub purple">All entries logged</div>
+  </div>
+  <div class="stat-card sc-gold">
+    <div class="sc-lbl">Pending Approvals</div>
+    <div class="sc-val">{{ pending_visitors|length|default:"0" }}</div>
+    <div class="sc-sub warn">{% if pending_visitors %}Awaiting resident{% else %}All cleared{% endif %}</div>
+  </div>
+  <div class="stat-card sc-teal">
+    <div class="sc-lbl">Currently Inside</div>
+    <div class="sc-val">{{ visitors_inside|length|default:"0" }}</div>
+    <div class="sc-sub ok">OTP verified entries</div>
+  </div>
+  <div class="stat-card sc-red">
+    <div class="sc-lbl">Active Alerts</div>
+    <div class="sc-val">{{ emergency_alerts|length|default:"0" }}</div>
+    <div class="sc-sub danger">{% if emergency_alerts %}Alerts active{% else %}All clear{% endif %}</div>
+  </div>
+</div>
+
+<!-- ── ROW 1: VISITOR LOG + ENTRY / EXIT FORMS ───────────── -->
+<div class="grid-2" id="visitors" data-section="visitors">
+
+  <!-- VISITOR LOG (left) -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">🔔 Today's Visitor Log</span>
+      <a href="{% url 'visitor_list' %}" class="panel-link">Full log →</a>
+    </div>
+    <div class="panel-body">
+
+      {# ── Approved + awaiting OTP verify (action needed) ── #}
+      {% with otp_pending=all_visitors|dictsort:"approval_status" %}
+      {% for visitor in all_visitors %}
+        {% if visitor.approval_status == 'Approved' and not visitor.is_verified and not visitor.exit_time %}
+        {% if forloop.first or forloop.revcounter == all_visitors|length %}
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;
+                    text-transform:uppercase;color:var(--teal);margin-bottom:0.6rem;">
+          🔐 Approved — OTP Verification Needed
+        </div>
+        {% endif %}
+        <div class="list-item">
+          <div class="item-av" style="background:linear-gradient(135deg,#0f7b6c,#2980b9)">
+            {{ visitor.visitor_name|slice:":2"|upper }}
+          </div>
+          <div class="item-body">
+            <div class="item-name">{{ visitor.visitor_name }}</div>
+            <div class="item-meta">
+              <span class="badge badge-{{ visitor.visitor_type|lower }}">{{ visitor.visitor_type }}</span>
+              &nbsp;{{ visitor.resident.first_name }} {{ visitor.resident.last_name }}
+              &nbsp;· {{ visitor.entry_time|date:"h:i A" }}
+            </div>
+            {% if visitor.otp %}
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:3px;">
+              Expected OTP: <span style="font-family:monospace;font-weight:700;
+                                         color:var(--teal);letter-spacing:0.15em;">{{ visitor.otp }}</span>
+            </div>
+            {% endif %}
+          </div>
+          <a href="{% url 'verify_otp_page' visitor.id %}"
+             class="btn-teal"
+             style="font-size:0.75rem;padding:5px 12px;white-space:nowrap;text-decoration:none;">
+            🔐 Verify OTP
+          </a>
+        </div>
+        {% endif %}
+      {% endfor %}
+      {% endwith %}
+
+      {# ── Pending visitors (awaiting resident approval) ── #}
+      {% if pending_visitors %}
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;
+                  text-transform:uppercase;color:var(--gold);margin:0.8rem 0 0.6rem;">
+        ⚠ Pending — Waiting for Resident Approval
+      </div>
+      {% for visitor in pending_visitors %}
+      <div class="list-item">
+        <div class="item-av" style="background:linear-gradient(135deg,#e67e22,#f39c12)">
+          {{ visitor.visitor_name|slice:":2"|upper }}
+        </div>
+        <div class="item-body">
+          <div class="item-name">{{ visitor.visitor_name }}</div>
+          <div class="item-meta">
+            <span class="badge badge-{{ visitor.visitor_type|lower }}">{{ visitor.visitor_type }}</span>
+            &nbsp;{{ visitor.resident.first_name }} {{ visitor.resident.last_name }}
+            &nbsp;· {{ visitor.entry_time|date:"h:i A" }}
+          </div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:3px;">
+            Resident must approve → OTP generated → security verifies
+          </div>
+        </div>
+        <span class="badge badge-pending">Pending</span>
+      </div>
+      {% endfor %}
+      <div class="panel-divider"></div>
+      {% endif %}
+
+      {# ── Currently inside (verified, not yet exited) ── #}
+      {% if visitors_inside %}
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;
+                  text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.6rem;">
+        🏠 Currently Inside
+      </div>
+      {% for visitor in visitors_inside %}
+      <div class="list-item">
+        <div class="item-av" style="background:linear-gradient(135deg,#27ae60,#0f7b6c)">
+          {{ visitor.visitor_name|slice:":2"|upper }}
+        </div>
+        <div class="item-body">
+          <div class="item-name">{{ visitor.visitor_name }}</div>
+          <div class="item-meta">
+            <span class="badge badge-{{ visitor.visitor_type|lower }}">{{ visitor.visitor_type }}</span>
+            &nbsp;{{ visitor.resident.first_name }} {{ visitor.resident.last_name }}
+            &nbsp;· In since {{ visitor.entry_time|date:"h:i A" }}
+          </div>
+        </div>
+        <form method="POST" action="{% url 'mark_exit' %}">
+          {% csrf_token %}
+          <input type="hidden" name="visitor_id" value="{{ visitor.id }}"/>
+          <button type="submit" class="btn-outline-gold"
+                  style="font-size:0.72rem;padding:4px 10px;white-space:nowrap;">
+            🚪 Exit
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+      <div class="panel-divider"></div>
+      {% endif %}
+
+      {# ── All today's entries (history) ── #}
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;
+                  text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:0.6rem;">
+        All Today's Entries
+      </div>
+      {% for visitor in all_visitors|slice:":8" %}
+      <div class="list-item">
+        <div class="item-av"
+             style="background:linear-gradient(135deg,{% cycle '#7e57c2,#4a1a6b' '#0f7b6c,#0a5c50' '#c0392b,#922b21' '#c9a84c,#a87c32' %})">
+          {{ visitor.visitor_name|slice:":2"|upper }}
+        </div>
+        <div class="item-body">
+          <div class="item-name">{{ visitor.visitor_name }}</div>
+          <div class="item-meta">
+            <span class="badge badge-{{ visitor.visitor_type|lower }}">{{ visitor.visitor_type }}</span>
+            &nbsp;{{ visitor.resident.first_name }} {{ visitor.resident.last_name }}
+            &nbsp;· {{ visitor.entry_time|date:"h:i A" }}
+            {% if visitor.exit_time %}&nbsp;→ {{ visitor.exit_time|date:"h:i A" }}{% endif %}
+          </div>
+          {% if visitor.is_verified %}
+          <div style="font-size:0.65rem;color:var(--teal);margin-top:2px;">✓ OTP verified</div>
+          {% endif %}
+        </div>
+        <span class="badge badge-{{ visitor.approval_status|lower }}">{{ visitor.approval_status }}</span>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">🔔</div><p>No visitors logged today.</p></div>
+      {% endfor %}
+
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN: LOG ENTRY + OTP VERIFY + MARK EXIT -->
+  <div class="panel" id="entry" data-section="entry">
+
+    {# ── Section A: Log new visitor at gate ── #}
+    <div class="panel-head">
+      <span class="panel-title">➕ Log Visitor Entry</span>
+    </div>
+    <div class="panel-body">
+      <form method="POST" action="{% url 'log_visitor' %}">
+        {% csrf_token %}
+        <div class="fg">
+          <label>Visitor Name</label>
+          <input type="text" name="visitor_name" placeholder="Full name" required/>
+        </div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>Type</label>
+            <select name="visitor_type" required>
+              <option value="">Select</option>
+              <option value="Guest">👤 Guest</option>
+              <option value="Delivery">📦 Delivery</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Visiting Resident</label>
+            <select name="resident_id" required>
+              <option value="">Select resident</option>
+              {% for resident in residents %}
+              <option value="{{ resident.id }}">{{ resident.first_name }} {{ resident.last_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.8rem;">
+          ℹ️ Visitor will be logged as <strong>Pending</strong>. The resident will approve &amp; OTP will be auto-generated.
+        </p>
+        <button type="submit" class="btn-purple btn-full">Log Entry (Notify Resident)</button>
+      </form>
+
+      <div class="panel-divider"></div>
+
+      {# ── Section B: Quick OTP Verify (by visitor ID or inline list) ── #}
+      <div class="panel-sub-title">🔐 Verify OTP for Entry</div>
+      {% with approved_unverified=all_visitors %}
+      {% if all_visitors %}
+        {# List approved-but-unverified visitors for quick action #}
+        {% for visitor in all_visitors %}
+          {% if visitor.approval_status == 'Approved' and not visitor.is_verified and not visitor.exit_time %}
+          <div style="display:flex;align-items:center;justify-content:space-between;
+                      padding:0.55rem 0.7rem;border:1px solid rgba(255,255,255,0.07);
+                      border-radius:8px;margin-bottom:0.5rem;gap:0.5rem;">
+            <div>
+              <div style="font-size:0.85rem;font-weight:600;">{{ visitor.visitor_name }}</div>
+              <div style="font-size:0.72rem;color:var(--muted);">
+                {{ visitor.visitor_type }} · {{ visitor.resident.first_name }}
+                &nbsp;·&nbsp;
+                OTP: <span style="font-family:monospace;font-weight:700;color:var(--teal);
+                                  letter-spacing:0.15em;">{{ visitor.otp }}</span>
+              </div>
+            </div>
+            <a href="{% url 'verify_otp_page' visitor.id %}"
+               class="btn-teal"
+               style="font-size:0.72rem;padding:4px 12px;text-decoration:none;white-space:nowrap;">
+              Verify →
+            </a>
+          </div>
+          {% endif %}
+        {% endfor %}
+
+        {# If no approved-unverified exist #}
+        {% with has_pending_verify=False %}
+        {% for v in all_visitors %}{% if v.approval_status == 'Approved' and not v.is_verified and not v.exit_time %}{% with has_pending_verify=True %}{% endwith %}{% endif %}{% endfor %}
+        {% endwith %}
+      {% endif %}
+      {% endwith %}
+
+      {# Fallback: no pending OTP verifications #}
+      {% with has_any=False %}
+      {% for visitor in all_visitors %}{% if visitor.approval_status == 'Approved' and not visitor.is_verified and not visitor.exit_time %}{% with has_any=True %}{% endwith %}{% endif %}{% endfor %}
+      {% if not has_any %}
+      <div style="font-size:0.8rem;color:var(--muted);padding:0.6rem 0;">
+        No visitors awaiting OTP verification right now.
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <div class="panel-divider"></div>
+
+      {# ── Section C: Mark Exit ── #}
+      <div class="panel-sub-title">🚪 Mark Visitor Exit</div>
+      {% if visitors_inside %}
+      <form method="POST" action="{% url 'mark_exit' %}">
+        {% csrf_token %}
+        <div class="fg">
+          <label>Select Visitor Inside</label>
+          <select name="visitor_id" required>
+            <option value="">Select visitor</option>
+            {% for visitor in visitors_inside %}
+            <option value="{{ visitor.id }}">
+              {{ visitor.visitor_name }} → {{ visitor.resident.first_name }} (in {{ visitor.entry_time|date:"h:i A" }})
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn-teal btn-full">Mark Exit ↗</button>
+      </form>
+      {% else %}
+      <div style="font-size:0.8rem;color:var(--muted);padding:0.4rem 0;">
+        No verified visitors currently inside.
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<!-- ── ROW 2: EMERGENCY + COMPLAINTS ─────────────────────── -->
+<div class="grid-2" id="emergency" data-section="emergency">
+
+  <!-- EMERGENCY -->
+  <div class="panel">
+    <div class="panel-head"><span class="panel-title">🚨 Emergency Controls</span></div>
+    <div class="panel-body">
+      <div class="em-grid">
+        <a class="em-btn em-fire"   href="tel:101"><div class="em-icon">🔥</div><div class="em-title">Fire Brigade</div><div class="em-num">101</div></a>
+        <a class="em-btn em-police" href="tel:100"><div class="em-icon">🚔</div><div class="em-title">Police</div><div class="em-num">100</div></a>
+        <a class="em-btn em-med"    href="tel:108"><div class="em-icon">🚑</div><div class="em-title">Ambulance</div><div class="em-num">108</div></a>
+        <a class="em-btn em-sec"    href="#"><div class="em-icon">📢</div><div class="em-title">Broadcast</div><div class="em-num">All Residents</div></a>
+      </div>
+      <button class="sos-btn" id="sosBtn">🚨 BROADCAST SOS TO ALL RESIDENTS</button>
+      <div class="panel-divider"></div>
+      <div class="panel-sub-title">Recent Alerts</div>
+      {% for alert in emergency_alerts|slice:":4" %}
+      <div class="alert-item">
+        <div class="alert-dot {% if alert.alert_type == 'Fire' %}dot-r{% elif alert.alert_type == 'Medical' %}dot-g{% else %}dot-y{% endif %}"></div>
+        <div>
+          <div class="alert-name">{{ alert.alert_type }} — {{ alert.message|truncatechars:42 }}</div>
+          <div class="alert-meta">{{ alert.alert_date|date:"d M Y, h:i A" }}</div>
+        </div>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">✅</div><p>No recent alerts.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- COMPLAINTS (read-only) -->
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">🛠️ Complaints Overview</span>
+      <span class="panel-note">Read only</span>
+    </div>
+    <div class="panel-body">
+      {% for complaint in all_complaints|slice:":6" %}
+      <div class="list-item">
+        <div class="item-ico {% if complaint.complaint_type == 'Plumbing' %}ico-blue{% elif complaint.complaint_type == 'Electrical' %}ico-gold{% else %}ico-teal{% endif %}">
+          {% if complaint.complaint_type == 'Plumbing' %}🔧{% elif complaint.complaint_type == 'Electrical' %}💡{% else %}📝{% endif %}
+        </div>
+        <div class="item-body">
+          <div class="item-name">{{ complaint.complaint_type }} — {{ complaint.resident.first_name }}</div>
+          <div class="item-meta">{{ complaint.description|truncatechars:38 }} · {{ complaint.complaint_date }}</div>
+        </div>
+        <span class="badge {% if complaint.status == 'Resolved' %}badge-resolved{% else %}badge-open{% endif %}">{{ complaint.status }}</span>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">🛠️</div><p>No complaints in system.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ── NOTICES (full width) ───────────────────────────────── -->
+<div class="grid-full">
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">📋 Society Notices</span>
+      <span class="panel-note">Read only</span>
+    </div>
+    <div class="panel-body"
+         style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.6rem;">
+      {% for notice in notices %}
+      <div style="border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:0.9rem 1rem;">
+        <div style="font-size:0.62rem;color:rgba(255,255,255,0.28);float:right">{{ notice.posted_date|date:"d M Y" }}</div>
+        <div class="notice-title">{{ notice.title }}</div>
+        <div class="notice-body">{{ notice.message|truncatechars:80 }}</div>
+      </div>
+      {% empty %}
+        <div class="empty-state"><div class="empty-icon">📋</div><p>No notices posted yet.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

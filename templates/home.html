@@ -1,0 +1,323 @@
+{% extends "index.html" %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>eSociety — Smart Residential Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+
+{% block content %}
+
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-text">
+    <div class="hero-badge"><span class="pulse"></span> Resident Portal · 2024</div>
+
+    <div style="display:flex;gap:0.55rem;flex-wrap:wrap;margin-bottom:1.4rem;">
+      <span class="rp rp-admin">Admin / Manager</span>
+      <span class="rp rp-resident">Resident</span>
+      <span class="rp rp-guard">Security Guard</span>
+    </div>
+
+    <h1>Smart Living,<br/><span>Better Community.</span></h1>
+    <p>eSociety integrates visitor management, complaint tracking, facility bookings, financial management, and emergency alerts into one elegant, connected platform.</p>
+
+    <div class="hero-cta">
+      <a href="dashboard.html" class="btn-primary">Enter Portal</a>
+      <a href="#roles" class="btn-ghost">Explore Features</a>
+    </div>
+
+    <div class="hero-stats">
+      <div><div class="stat-val">240</div><div class="stat-lbl">Residents</div></div>
+      <div><div class="stat-val">18</div><div class="stat-lbl">Buildings</div></div>
+      <div><div class="stat-val">6</div><div class="stat-lbl">Core Modules</div></div>
+      <div><div class="stat-val">99%</div><div class="stat-lbl">Uptime</div></div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="dash-card">
+      <div class="dc-head">
+        <span class="dc-title">Society Overview</span>
+        <div class="dc-live"><span class="dc-dot"></span> Live</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-card"><div class="mc-lbl">Maintenance Due</div><div class="mc-val">₹2,500</div><div class="mc-sub warn">Due Mar 31</div></div>
+        <div class="mini-card"><div class="mc-lbl">Open Complaints</div><div class="mc-val">3</div><div class="mc-sub">2 in progress</div></div>
+        <div class="mini-card"><div class="mc-lbl">Visitors Today</div><div class="mc-val">12</div><div class="mc-sub">4 inside now</div></div>
+        <div class="mini-card"><div class="mc-lbl">Amenity Bookings</div><div class="mc-val">7</div><div class="mc-sub danger">Pool full today</div></div>
+      </div>
+      <div class="notice-pill"><span>📢</span><span class="np-text"><strong>AGM Meeting</strong> — 22 March, 7 PM · Community Hall</span></div>
+      <div class="alert-pill"><span>🚨</span><span class="ap-text"><strong>Alert:</strong> Water supply off 10 AM–4 PM · 20 Mar</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── USER ROLES ── -->
+<section class="roles-section section" id="roles">
+  <div class="roles-header">
+    <div class="s-label">User Roles</div>
+    <div class="s-title">Three Roles, One Platform</div>
+    <p class="s-desc">Every stakeholder in the residential ecosystem gets a tailored, role-based experience.</p>
+  </div>
+  <div class="roles-grid">
+    <div class="role-card rc-admin">
+      <div class="rc-icon">👨‍💼</div>
+      <div class="rc-name">Admin / Manager</div>
+      <div class="rc-sub">Society Operations</div>
+      <ul class="rc-list">
+        <li>Oversee all society operations</li>
+        <li>Manage resident & staff profiles</li>
+        <li>Track finances & generate reports</li>
+        <li>Publish notices, polls & events</li>
+      </ul>
+      <a href="admin-login.html" class="rc-btn">Admin Login →</a>
+    </div>
+    <div class="role-card rc-resident">
+      <div class="rc-icon">🏠</div>
+      <div class="rc-name">Resident</div>
+      <div class="rc-sub">Your Home, Your Control</div>
+      <ul class="rc-list">
+        <li>Pay monthly maintenance dues online</li>
+        <li>Raise complaints & track resolution</li>
+        <li>Book gym, pool, hall & facilities</li>
+        <li>Pre-approve visitors with OTP access</li>
+      </ul>
+      <a href="resident-login.html" class="rc-btn">Resident Login →</a>
+    </div>
+    <div class="role-card rc-guard">
+      <div class="rc-icon">🛡️</div>
+      <div class="rc-name">Security Guard</div>
+      <div class="rc-sub">Gate & Premises Safety</div>
+      <ul class="rc-list">
+        <li>Monitor visitor entries & exits</li>
+        <li>Verify OTP / QR approvals at gate</li>
+        <li>Log deliveries & staff movements</li>
+        <li>Raise emergency alerts instantly</li>
+      </ul>
+      <a href="guard-login.html" class="rc-btn">Guard Login →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="features-section section" id="features">
+  <div class="features-header">
+    <div class="s-label">Core Modules</div>
+    <div class="s-title">Everything You Need</div>
+    <p class="s-desc">All management functions at your fingertips — from maintenance payments to emergency alerts.</p>
+  </div>
+  <div class="features-grid">
+    <a href="payments.html" class="feat-card"><div class="feat-icon fi-gold">💳</div><div class="feat-name">Maintenance Payment</div><div class="feat-desc">Pay dues & view history</div></a>
+    <a href="notices.html" class="feat-card"><div class="feat-icon fi-teal">📋</div><div class="feat-name">Notice Board</div><div class="feat-desc">Announcements & polls</div></a>
+    <a href="visitors.html" class="feat-card"><div class="feat-icon fi-navy">🔔</div><div class="feat-name">Visitor Entry</div><div class="feat-desc">OTP & QR gate access</div></a>
+    <a href="complaints.html" class="feat-card"><div class="feat-icon fi-red">🛠️</div><div class="feat-name">Complaints</div><div class="feat-desc">Raise & track issues</div></a>
+    <a href="amenities.html" class="feat-card"><div class="feat-icon fi-blue">🏊</div><div class="feat-name">Amenity Booking</div><div class="feat-desc">Gym, pool, club slots</div></a>
+    {% comment %} <a href="directory.html" class="feat-card"><div class="feat-icon fi-purple">📁</div><div class="feat-name">Resident Directory</div><div class="feat-desc">Flat-wise contacts</div></a> {% endcomment %}
+    <a href="emergency.html" class="feat-card"><div class="feat-icon fi-red">🚨</div><div class="feat-name">Emergency Alerts</div><div class="feat-desc">One-tap SOS broadcast</div></a>
+    <a href="reports.html" class="feat-card"><div class="feat-icon fi-green">📊</div><div class="feat-name">Financial Reports</div><div class="feat-desc">Invoices & expense logs</div></a>
+    <a href="community.html" class="feat-card"><div class="feat-icon fi-purple">🗳️</div><div class="feat-name">Community Hub</div><div class="feat-desc">Polls & group discussions</div></a>
+    {% comment %} <a href="help.html" class="feat-card"><div class="feat-icon fi-gold">💬</div><div class="feat-name">Help Desk</div><div class="feat-desc">Support & enquiries</div></a> {% endcomment %}
+  </div>
+</section>
+
+<!-- ── NOTICE BOARD ── -->
+<section class="notices-section section" id="notices">
+  <div class="notices-layout">
+    <div>
+      <div class="s-label s-label-w">Announcements</div>
+      <div class="s-title s-title-w">Notice Board</div>
+      <p class="s-desc s-desc-w">Stay updated with society announcements, events, maintenance alerts, and community polls.</p>
+      <br/>
+      <a href="notices.html" class="btn-primary" style="display:inline-block;margin-top:0.5rem;">View All Notices</a>
+
+      <div class="poll-box">
+        <div class="poll-q">🗳️ Should we install EV charging stations in the parking lot?</div>
+        <div class="poll-opt"><div class="poll-row"><span>Yes, definitely</span><span style="color:var(--gold)">62%</span></div><div class="poll-bar-bg"><div class="poll-bar pb-gold" style="width:62%"></div></div></div>
+        <div class="poll-opt"><div class="poll-row"><span>No, not needed</span><span style="color:var(--teal-light)">22%</span></div><div class="poll-bar-bg"><div class="poll-bar pb-teal" style="width:22%"></div></div></div>
+        <div class="poll-opt"><div class="poll-row"><span>Need more info</span><span style="color:#b39ddb">16%</span></div><div class="poll-bar-bg"><div class="poll-bar pb-purple" style="width:16%"></div></div></div>
+        <button class="poll-vote" onclick="alert('✅ Vote recorded!')">Cast Your Vote</button>
+      </div>
+    </div>
+
+    <div class="notice-list">
+      <div class="n-card"><div class="n-meta"><span class="n-tag t-urgent">Urgent</span><span class="n-date">18 Mar 2024</span></div><div class="n-title">Water Supply Off — 20th March</div><div class="n-body">Suspended 10 AM–4 PM for pipeline maintenance. Please store water.</div></div>
+      <div class="n-card"><div class="n-meta"><span class="n-tag t-event">Event</span><span class="n-date">16 Mar 2024</span></div><div class="n-title">Annual General Meeting — 22 March</div><div class="n-body">Attend AGM in the Community Hall at 7:00 PM. Agenda attached.</div></div>
+      <div class="n-card"><div class="n-meta"><span class="n-tag t-maint">Maintenance</span><span class="n-date">14 Mar 2024</span></div><div class="n-title">Lift Maintenance — Block C, 21 Mar</div><div class="n-body">Lift no. 2 non-operational for annual servicing on 21st March.</div></div>
+      <div class="n-card"><div class="n-meta"><span class="n-tag t-gen">General</span><span class="n-date">10 Mar 2024</span></div><div class="n-title">March Maintenance Fee Reminder</div><div class="n-body">Clear dues before 31st March to avoid late fee penalty.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMPLAINTS ── -->
+<section class="complaint-section section" id="complaints">
+  <div class="complaint-layout">
+    <div>
+      <div class="s-label">Issue Management</div>
+      <div class="s-title">Complaint Tracking</div>
+      <p class="s-desc">Report issues and track resolution status in real-time. Tasks are assigned to specific staff for accountability.</p>
+      <div class="c-list">
+        <div class="c-row"><div class="c-ico fi-red">🔧</div><div class="c-info"><div class="c-name">Plumbing Leak — Flat B-304</div><div class="c-meta">15 Mar · Assigned to Ramesh (Plumber)</div></div><span class="c-badge b-prog">In Progress</span></div>
+        <div class="c-row"><div class="c-ico fi-gold">💡</div><div class="c-info"><div class="c-name">Street Light Fault — Block A</div><div class="c-meta">12 Mar · Assigned to Electrician</div></div><span class="c-badge b-open">Open</span></div>
+        <div class="c-row"><div class="c-ico fi-teal">🧹</div><div class="c-info"><div class="c-name">Garbage Overflow — Parking Lot</div><div class="c-meta">10 Mar · Resolved on 11 Mar</div></div><span class="c-badge b-done">Resolved</span></div>
+        <div class="c-row"><div class="c-ico fi-navy">🚪</div><div class="c-info"><div class="c-name">Gate Motor Failure — Block D</div><div class="c-meta">8 Mar · Awaiting spare part</div></div><span class="c-badge b-open">Open</span></div>
+      </div>
+      <br/><a href="complaints.html" class="btn-primary" style="display:inline-block">View All Complaints →</a>
+    </div>
+
+    <div class="c-form">
+      <div class="cf-title">Raise a Complaint</div>
+      <div class="fg"><label>Category</label><select><option>Plumbing</option><option>Electrical</option><option>Lift / Elevator</option><option>Housekeeping</option><option>Security</option><option>Parking</option><option>Other</option></select></div>
+      <div class="fg"><label>Subject</label><input type="text" placeholder="Brief description of issue"/></div>
+      <div class="fg-row">
+        <div class="fg"><label>Flat No.</label><input type="text" placeholder="e.g. B-304"/></div>
+        <div class="fg"><label>Priority</label><select><option>Normal</option><option>Urgent</option><option>Emergency</option></select></div>
+      </div>
+      <div class="fg"><label>Details</label><textarea rows="3" placeholder="Describe the issue in detail..."></textarea></div>
+      <button class="sub-btn" onclick="alert('✅ Complaint submitted!\nTracking ID: #CMP-2024-087')">Submit Complaint</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── FACILITY BOOKING ── -->
+<section class="facility-section section" id="facilities">
+  <div class="facility-layout">
+    <div>
+      <div class="s-label s-label-w">Amenities</div>
+      <div class="s-title s-title-w">Facility Booking</div>
+      <p class="s-desc s-desc-w">Reserve shared amenities. Check real-time availability and pay online for confirmed bookings.</p>
+      <div class="fac-grid">
+        <div class="fac-card" onclick="pickFac('Swimming Pool')"><div class="fac-icon">🏊</div><div class="fac-name">Swimming Pool</div><div class="fac-avail busy">Full Today</div></div>
+        <div class="fac-card" onclick="pickFac('Gymnasium')"><div class="fac-icon">🏋️</div><div class="fac-name">Gymnasium</div><div class="fac-avail">3 Slots Free</div></div>
+        <div class="fac-card" onclick="pickFac('Badminton Court')"><div class="fac-icon">🏸</div><div class="fac-name">Badminton</div><div class="fac-avail">Eve: 6–10 PM</div></div>
+        <div class="fac-card" onclick="pickFac('Community Hall')"><div class="fac-icon">🎉</div><div class="fac-name">Comm. Hall</div><div class="fac-avail">For Events</div></div>
+        <div class="fac-card" onclick="pickFac('Terrace Garden')"><div class="fac-icon">🌿</div><div class="fac-name">Terrace Garden</div><div class="fac-avail">Available</div></div>
+        <div class="fac-card" onclick="pickFac('Kids Play Area')"><div class="fac-icon">🎮</div><div class="fac-name">Kids Play Area</div><div class="fac-avail">Always Open</div></div>
+      </div>
+    </div>
+
+    <div class="book-form bf">
+      <div class="bf-title">Book a Slot</div>
+      <div class="fg"><label>Facility</label><select id="facSel"><option>Select amenity</option><option>Swimming Pool</option><option>Gymnasium</option><option>Badminton Court</option><option>Community Hall</option><option>Terrace Garden</option><option>Kids Play Area</option></select></div>
+      <div class="fg-row">
+        <div class="fg"><label>Date</label><input type="date"/></div>
+        <div class="fg"><label>Time Slot</label><select><option>6–7 AM</option><option>7–8 AM</option><option>8–9 AM</option><option>6–7 PM</option><option>7–8 PM</option><option>8–9 PM</option></select></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>No. of Persons</label><select><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></div>
+        <div class="fg"><label>Flat No.</label><input type="text" placeholder="e.g. B-304"/></div>
+      </div>
+      <button class="sub-btn sub-btn-gold" onclick="alert('✅ Booking confirmed!\nPayment link sent to your mobile.')">Confirm Booking & Pay</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── PAYMENTS ── -->
+<section class="payment-section section" id="payments">
+  <div class="payment-layout">
+    <div>
+      <div class="s-label">Finance</div>
+      <div class="s-title">Maintenance & Payments</div>
+      <p class="s-desc">View pending dues, pay online instantly, generate invoices, and track all transactions in one place.</p>
+      <br/><br/>
+      <div class="pay-card">
+        <div class="pc-lbl">Outstanding Balance</div>
+        <div class="pc-amt"><em>₹</em>2,500</div>
+        <div class="pc-row"><span class="pk">Flat No.</span><span class="pv">B-304</span></div>
+        <div class="pc-row"><span class="pk">Resident</span><span class="pv">Ramesh Patel</span></div>
+        <div class="pc-row"><span class="pk">Maintenance (Mar)</span><span class="pv">₹2,000</span></div>
+        <div class="pc-row"><span class="pk">Parking Charge</span><span class="pv">₹500</span></div>
+        <div class="pc-row"><span class="pk">Overdue</span><span class="pv" style="color:var(--teal-light)">₹0</span></div>
+        <a href="payments.html" class="pay-now">Pay Now →</a>
+      </div>
+    </div>
+
+    <div class="history-box">
+      <h3>Payment History</h3>
+      <div class="h-item"><div class="h-av" style="background:linear-gradient(135deg,var(--teal),#27ae60)">FEB</div><div><div class="h-month">February 2024</div><div class="h-date">Paid 5 Feb · #TXN2402</div></div><div style="text-align:right"><div class="h-amt h-paid">₹2,500</div><div class="badge-p bp-paid">Paid</div></div></div>
+      <div class="h-item"><div class="h-av" style="background:linear-gradient(135deg,var(--teal),#27ae60)">JAN</div><div><div class="h-month">January 2024</div><div class="h-date">Paid 3 Jan · #TXN2401</div></div><div style="text-align:right"><div class="h-amt h-paid">₹2,500</div><div class="badge-p bp-paid">Paid</div></div></div>
+      <div class="h-item"><div class="h-av" style="background:linear-gradient(135deg,#e67e22,#f39c12)">DEC</div><div><div class="h-month">December 2023</div><div class="h-date">Due 31 Dec · Overdue</div></div><div style="text-align:right"><div class="h-amt h-pending">₹2,500</div><div class="badge-p bp-pend">Pending</div></div></div>
+      <div class="h-item"><div class="h-av" style="background:linear-gradient(135deg,var(--teal),#27ae60)">NOV</div><div><div class="h-month">November 2023</div><div class="h-date">Paid 2 Nov · #TXN2311</div></div><div style="text-align:right"><div class="h-amt h-paid">₹2,500</div><div class="badge-p bp-paid">Paid</div></div></div>
+      <br/><a href="reports.html" class="btn-primary" style="display:inline-block">Download Invoice / Report →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── VISITOR ── -->
+<section class="visitor-section section" id="visitors">
+  <div class="visitor-layout">
+    <div>
+      <div class="s-label">Gate Management</div>
+      <div class="s-title">Visitor Entry System</div>
+      <p class="s-desc">Pre-approve guests with OTP or QR code. Security guards verify at the gate and get real-time resident alerts.</p>
+      <br/>
+      <div class="v-list">
+        <h3>Today's Visitors</h3>
+        <div class="v-item"><div class="v-av" style="background:linear-gradient(135deg,var(--teal),var(--gold))">AK</div><div><div class="v-name">Amit Kumar</div><div class="v-meta">Flat B-304 · 10:32 AM · Guest</div></div><span class="v-status vs-in">IN</span></div>
+        <div class="v-item"><div class="v-av" style="background:linear-gradient(135deg,#9b59b6,var(--gold))">RS</div><div><div class="v-name">Rohit Shah</div><div class="v-meta">Flat A-101 · 9:15 AM · Guest</div></div><span class="v-status vs-out">OUT</span></div>
+        <div class="v-item"><div class="v-av" style="background:linear-gradient(135deg,#e74c3c,#f39c12)">PM</div><div><div class="v-name">Priya Mehta</div><div class="v-meta">Flat C-210 · 8:50 AM · Maintenance</div></div><span class="v-status vs-out">OUT</span></div>
+        <div class="v-item"><div class="v-av" style="background:linear-gradient(135deg,var(--teal),#2980b9)">DD</div><div><div class="v-name">Delivery — Zomato</div><div class="v-meta">Flat D-402 · 1:05 PM · Delivery</div></div><span class="v-status vs-in">IN</span></div>
+      </div>
+    </div>
+
+    <div class="v-form">
+      <div class="vf-title">Pre-Approve a Visitor</div>
+      <div class="vf-sub">An OTP or QR code will be sent for verified gate entry.</div>
+      <div class="fg"><label>Visitor Name</label><input type="text" id="visName" placeholder="Enter full name"/></div>
+      <div class="fg-row">
+        <div class="fg"><label>Mobile No.</label><input type="tel" placeholder="10-digit number"/></div>
+        <div class="fg"><label>Purpose</label><select><option>Guest</option><option>Delivery</option><option>Service</option><option>Cab / Driver</option><option>Other</option></select></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Expected Date</label><input type="date"/></div>
+        <div class="fg"><label>Expected Time</label><input type="time"/></div>
+      </div>
+      <div class="fg"><label>Your Flat No.</label><input type="text" placeholder="e.g. B-304"/></div>
+      <button class="sub-btn" onclick="genOTP()">Pre-Approve & Generate OTP</button>
+      <div class="otp-box" id="otpBox">
+        <div class="otp-lbl">One-Time Access Code</div>
+        <div class="otp-code" id="otpCode">------</div>
+        <div class="otp-note">Valid for 24 hours · Share with your visitor</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── EMERGENCY ── -->
+<section class="emergency-section section" id="emergency">
+  <div class="emergency-layout">
+    <div>
+      <div class="s-label" style="color:#e74c3c">Safety First</div>
+      <div class="s-title s-title-w">Emergency Alerts</div>
+      <p class="s-desc s-desc-w">Instantly notify all residents and security during emergencies. Quick-dial local authorities with one tap.</p>
+      <div class="em-grid">
+        <a class="em-btn em-fire" href="tel:101"><div class="em-icon">🔥</div><div class="em-title">Fire Brigade</div><div class="em-num">Dial 101</div></a>
+        <a class="em-btn em-police" href="tel:100"><div class="em-icon">🚔</div><div class="em-title">Police</div><div class="em-num">Dial 100</div></a>
+        <a class="em-btn em-med" href="tel:108"><div class="em-icon">🚑</div><div class="em-title">Ambulance</div><div class="em-num">Dial 108</div></a>
+        <a class="em-btn em-sec" href="#"><div class="em-icon">🛡️</div><div class="em-title">Security Guard</div><div class="em-num">Ring Gate</div></a>
+      </div>
+      <button class="sos-btn" onclick="alert('🚨 SOS broadcast sent to all residents & security!')">🚨 Broadcast SOS to All Residents</button>
+    </div>
+
+    <div class="alert-log">
+      <div class="al-title">Recent Alerts</div>
+      <div class="al-item"><div class="al-dot dot-r"></div><div><div class="al-name">Unauthorized Entry — Gate 2</div><div class="al-meta">Today · 11:42 PM · Resolved by Security</div></div></div>
+      <div class="al-item"><div class="al-dot dot-y"></div><div><div class="al-name">Smoke Detector — Block A, Floor 3</div><div class="al-meta">Yesterday · 6:15 PM · False alarm</div></div></div>
+      <div class="al-item"><div class="al-dot dot-g"></div><div><div class="al-name">Medical Emergency — Mrs. Sharma</div><div class="al-meta">18 Mar · Ambulance dispatched · Resolved</div></div></div>
+      <div class="al-item"><div class="al-dot dot-y"></div><div><div class="al-name">Power Outage — Block C & D</div><div class="al-meta">15 Mar · Restored in 45 minutes</div></div></div>
+      <div class="al-item"><div class="al-dot dot-g"></div><div><div class="al-name">Water Pipeline Burst — Basement</div><div class="al-meta">10 Mar · Repair team deployed · Resolved</div></div></div>
+    </div>
+  </div>
+</section>
+
+
+{% endblock content %}
+
+</body>
+</html>

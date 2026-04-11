@@ -1,0 +1,66 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Invoice — eSociety{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  <a href="{% url 'payment_list' %}"       class="sb-link active"><span class="sb-icon">💳</span> Payments</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+
+<div class="inv-card" id="invoice">
+  <div class="inv-header">
+    <div class="inv-header-top">
+      <div class="inv-brand">e<span>Society</span></div>
+      <div class="inv-badge">{{ payment.payment_status }}</div>
+    </div>
+    <div class="inv-num-lbl">Invoice</div>
+    <div class="inv-num-val">#INV-{{ payment.id|stringformat:"04d" }}</div>
+  </div>
+
+  <div class="inv-body">
+    <div class="inv-status-row">
+      <div class="inv-check">
+        <svg viewBox="0 0 12 12" fill="none">
+          <path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="inv-status-text">
+        Payment received
+        {% if payment.payment_date %}on {{ payment.payment_date|date:"d M Y" }}{% endif %}
+      </span>
+    </div>
+
+    <div class="inv-total-box">
+      <span class="inv-total-label">Amount paid</span>
+      <span class="inv-total-amt"><em>₹</em>{{ payment.amount }}</span>
+    </div>
+
+    <div class="inv-section-label">Payment details</div>
+    <table class="inv-table">
+      <tr><td>Resident</td><td>{{ payment.resident.get_full_name|default:payment.resident.email }}</td></tr>
+      <tr><td>Month</td><td>{{ payment.month }}</td></tr>
+      <tr><td>Type</td><td>Maintenance Charge</td></tr>
+      <tr><td>Payment date</td>
+          <td>{% if payment.payment_date %}{{ payment.payment_date|date:"d M Y" }}{% else %}—{% endif %}</td>
+      </tr>
+      <tr><td>Status</td><td style="color:#1D9E75">{{ payment.payment_status }}</td></tr>
+    </table>
+
+    <div class="inv-section-label">Issued by</div>
+    <table class="inv-table">
+      <tr><td>Society</td><td>eSociety Management</td></tr>
+      <tr><td>Contact</td><td>admin@esociety.in</td></tr>
+    </table>
+  </div>
+
+  <div class="inv-footer">
+    <button class="btn-inv btn-inv-outline" onclick="window.print()">🖨 Print Invoice</button>
+    <a href="{% url 'payment_list' %}" class="btn-inv btn-inv-primary">← Back to Payments</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "core/auth.html" %}
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Login — eSociety{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}"/>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+{% block content %}
+
+<!-- ── MAIN ── -->
+<div class="auth-wrapper">
+
+  <!-- Left panel -->
+  <div class="auth-left">
+    <div class="auth-badge"><span class="pulse"></span>Residential Management</div>
+    <h1>Welcome<br/>Back to <span>eSociety</span></h1>
+    <p>Your smart society dashboard awaits. Sign in to manage your home, community, and everything in between.</p>
+    <div class="role-pills">
+      <span class="rp rp-admin">👑 Admin</span>
+      <span class="rp rp-resident">🏠 Resident</span>
+      <span class="rp rp-guard">🛡️ Guard</span>
+    </div>
+    <div class="auth-stats">
+      <div><div class="stat-val">1,200+</div><div class="stat-lbl">Residents</div></div>
+      <div><div class="stat-val">99.9%</div><div class="stat-lbl">Uptime</div></div>
+      <div><div class="stat-val">24/7</div><div class="stat-lbl">Support</div></div>
+    </div>
+  </div>
+
+  <!-- Right panel – form -->
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="card-header">
+        <div class="card-title">Sign In</div>
+        <div class="card-sub">Enter your credentials to access your dashboard</div>
+      </div>
+
+
+
+
+      {% comment %}
+  login.html — drop your existing card-header / auth-right structure above this block.
+  This file shows: the form, per-field errors, and two popups (signup success + login success).
+{% endcomment %}
+
+<!-- ── POPUPS ──────────────────────────────────────────────────────────────── -->
+
+{% for message in messages %}
+  {% if message.message == "SIGNUP_SUCCESS" %}
+  <!-- Signup success popup — shown once after redirect from signup -->
+  <div class="popup-overlay" id="signupPopup">
+    <div class="popup-card">
+      <div class="popup-icon">🎉</div>
+      <h2 class="popup-title">Registration Successful!</h2>
+      <p class="popup-body">Your account has been created. Welcome to <strong>eSociety</strong>!<br>Please sign in to continue.</p>
+      <button class="popup-btn" onclick="closePopup('signupPopup')">Sign In Now →</button>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if message.message == "PASSWORD_RESET_SUCCESS" %}
+  <!-- Password reset success popup -->
+  <div class="popup-overlay" id="resetPopup">
+    <div class="popup-card">
+      <div class="popup-icon">🔒</div>
+      <h2 class="popup-title">Password Reset!</h2>
+      <p class="popup-body">Your password has been updated successfully.<br>Please sign in with your new password.</p>
+      <button class="popup-btn" onclick="closePopup('resetPopup')">Sign In →</button>
+    </div>
+  </div>
+  {% endif %}
+{% endfor %}
+
+<!-- Login success popup — triggered by JS after Django sets the message, before redirect -->
+<div class="popup-overlay" id="loginPopup" style="display:none;">
+  <div class="popup-card">
+    <div class="popup-icon">✅</div>
+    <h2 class="popup-title">Login Successful!</h2>
+    <p class="popup-body">Welcome back! Redirecting you to your dashboard…</p>
+    <div class="popup-spinner"></div>
+  </div>
+</div>
+
+      <!-- Django renders {{ form.non_field_errors }} here -->
+<!-- ── FORM ───────────────────────────────────────────────────────────────── -->
+
+{% if form.non_field_errors %}
+<ul class="non-field-errors errorlist">
+  {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<form method="post" action="{% url 'login' %}" novalidate id="loginForm">
+  {% csrf_token %}
+
+  <!-- Email -->
+  <div class="fg {% if errors.email %}has-error{% endif %}">
+    <label for="{{ form.email.id_for_label }}">Email Address</label>
+    {{ form.email }}
+    {% if errors.email %}
+      <div class="field-error">
+        <span class="err-icon">✉️</span> {{ errors.email }}
+      </div>
+    {% elif form.email.errors %}
+      <ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+
+  <!-- Password -->
+  <div class="fg {% if errors.password %}has-error{% endif %}">
+    <label for="{{ form.password.id_for_label }}">Password</label>
+    <div class="pw-wrap">
+      {{ form.password }}
+      <button type="button" class="pw-eye" onclick="togglePw('id_password', this)" aria-label="Toggle password">👁</button>
+    </div>
+    {% if errors.password %}
+      <div class="field-error">
+        <span class="err-icon">🔑</span> {{ errors.password }}
+      </div>
+    {% elif form.password.errors %}
+      <ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+  </div>
+
+  <!-- Forgot password link -->
+  <div class="form-extras">
+    <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot password?</a>
+  </div>
+
+  <button type="submit" class="sub-btn" id="loginSubmitBtn">Sign In →</button>
+</form>
+
+      <div class="divider"><span>New to eSociety?</span></div>
+      <div class="switch-link">
+        Don't have an account? <a href="{% url 'signup' %}">Create one</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock content %}
+<!-- ── FOOTER ── -->
+
+
+<script src="{% static 'js/auth.js' %}"></script>
+</body>
+</html>

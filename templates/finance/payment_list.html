@@ -1,0 +1,80 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% block title %}Payments — eSociety{% endblock %}
+
+{% comment %} {% block sidebar %}
+  <div class="sb-section">Navigation</div>
+  <a href="{% url 'resident_dashboard' %}" class="sb-link"><span class="sb-icon">🏠</span> Dashboard</a>
+  <a href="{% url 'visitor_list' %}"   class="sb-link"><span class="sb-icon">👥</span> Visitors</a>
+  <a href="{% url 'complaint_list' %}" class="sb-link"><span class="sb-icon">🛠️</span> Complaints</a>
+  <a href="{% url 'facility_list' %}"  class="sb-link"><span class="sb-icon">🏊</span> Facilities</a>
+  <a href="{% url 'payment_list' %}"   class="sb-link active"><span class="sb-icon">💳</span> Payments</a>
+  <a href="{% url 'notice_list' %}"    class="sb-link"><span class="sb-icon">📋</span> Notices</a>
+  <div class="sb-section">Account</div>
+  <a href="{% url 'logout' %}" class="sb-link"><span class="sb-icon">🚪</span> Logout</a>
+{% endblock %} {% endcomment %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>💳 Maintenance Payments</h1>
+    <p>Your dues, payment history and invoices</p>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="stat-row" style="grid-template-columns:repeat(3,1fr);max-width:600px;margin-bottom:1.5rem;">
+  <div class="stat-card sc-gold"><div class="sc-lbl">Total Due</div><div class="sc-val">₹{{ total_pending }}</div></div>
+  <div class="stat-card sc-teal"><div class="sc-lbl">Paid</div><div class="sc-val">{{ paid_count }}</div></div>
+  <div class="stat-card sc-red"><div class="sc-lbl">Pending</div><div class="sc-val">{{ pending_count }}</div></div>
+</div>
+
+<!-- Pending payments action cards -->
+{% if pending_payments %}
+<div style="margin-bottom:1.5rem;">
+  <div style="font-size:0.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;">⚠ Outstanding Dues</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;">
+    {% for payment in pending_payments %}
+    <div class="pay-card">
+      <div class="pay-lbl">Due — {{ payment.month }}</div>
+      <div class="pay-amt"><em>₹</em>{{ payment.amount }}</div>
+      <div style="margin:0.8rem 0">
+        <div class="pay-row"><span class="pay-key">Month</span><span class="pay-val">{{ payment.month }}</span></div>
+        <div class="pay-row"><span class="pay-key">Status</span><span class="pay-val" style="color:#e67e22">{{ payment.payment_status }}</span></div>
+      </div>
+      <a href="{% url 'pay_maintenance' payment.id %}" style="display:block;text-align:center;width:100%;padding:0.7rem;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--dark);border:none;border-radius:9px;font-weight:700;text-decoration:none;font-size:0.85rem;">Pay Now →</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Full payment history -->
+<div class="panel">
+  <div class="panel-head"><span class="panel-title">Payment History</span></div>
+  <div class="panel-body" style="padding:0">
+    <table class="data-table">
+      <thead>
+        <tr><th>#</th><th>Month</th><th>Amount</th><th>Payment Date</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for payment in all_payments %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td style="font-weight:600">{{ payment.month }}</td>
+          <td>₹{{ payment.amount }}</td>
+          <td>{% if payment.payment_date %}{{ payment.payment_date|date:"d M Y" }}{% else %}—{% endif %}</td>
+          <td><span class="badge {% if payment.payment_status == 'Paid' %}badge-paid{% else %}badge-pending{% endif %}">{{ payment.payment_status }}</span></td>
+          <td>
+            {% if payment.payment_status == 'Pending' %}
+            <a href="{% url 'pay_maintenance' payment.id %}" class="btn-gold" style="padding:4px 14px;font-size:0.75rem;border-radius:6px;text-decoration:none;display:inline-block;">Pay</a>
+            {% else %}<span style="color:var(--teal);font-size:0.78rem;">✓ Paid</span>{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted)">No payment records.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
