@@ -1,17 +1,5 @@
 {% extends "core/auth.html" %}
-
 {% load static %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{% block title %}Login — eSociety{% endblock %}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="{% static 'css/auth.css' %}"/>
-</head>
-<body>
 
 <!-- ── NAV ── -->
 {% block content %}
@@ -149,8 +137,3 @@
 </div>
 {% endblock content %}
 <!-- ── FOOTER ── -->
-
-
-<script src="{% static 'js/auth.js' %}"></script>
-</body>
-</html>

@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const visitorForm = document.getElementById('visitorPreApproveForm');
   if (visitorForm) {
     visitorForm.addEventListener('submit', function () {
-      const otpBox  = document.getElementById('otpBox');
+      const otpBox = document.getElementById('otpBox');
       const otpCode = document.getElementById('otpCode');
       if (otpBox && otpCode) {
         const code = Math.floor(100000 + Math.random() * 900000);
@@ -141,20 +141,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // dashboard.js (for dashboard base template) for clock
 
-  // Clock
-  function updateClock() {
-    const now = new Date();
-    document.getElementById('navClock').textContent = now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
-  }
-  updateClock(); setInterval(updateClock, 1000);
- 
-  // Sidebar active link based on scroll
-  const sections = document.querySelectorAll('[data-section]');
-  const sbLinks  = document.querySelectorAll('.sb-link[href^="#"]');
-  window.addEventListener('scroll', () => {
-    let cur = '';
-    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.dataset.section; });
-    sbLinks.forEach(l => {
-      l.classList.toggle('active', l.getAttribute('href') === '#' + cur);
-    });
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('navClock').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// Sidebar active link based on scroll
+const sections = document.querySelectorAll('[data-section]');
+const sbLinks = document.querySelectorAll('.sb-link[href^="#"]');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.dataset.section; });
+  sbLinks.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + cur);
   });
+});
+
+
+
+
+
+// resident dashboard js
+
+function selectFacility(id, name) {
+  const sel = document.getElementById('facilitySelect');
+  if (sel) {
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value == id) { sel.selectedIndex = i; break; }
+    }
+  }
+  document.querySelectorAll('.fac-card').forEach(c => c.style.borderColor = '');
+  event.currentTarget.style.borderColor = 'var(--gold)';
+}
+// Set min date for booking
+const bd = document.getElementById('bookingDate');
+if (bd) bd.min = new Date().toISOString().split('T')[0];
+
+
+
+
+
+// verify otp.html js
+
+
+/* Auto-format OTP input as digits only */
+document.querySelector('input[name="otp"]').addEventListener('input', function () {
+  this.value = this.value.replace(/\D/g, '').slice(0, 6);
+});

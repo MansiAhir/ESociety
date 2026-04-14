@@ -454,18 +454,6 @@
 
 {% block extra_js %}
 <script>
-function selectFacility(id, name) {
-  const sel = document.getElementById('facilitySelect');
-  if (sel) {
-    for (let i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value == id) { sel.selectedIndex = i; break; }
-    }
-  }
-  document.querySelectorAll('.fac-card').forEach(c => c.style.borderColor = '');
-  event.currentTarget.style.borderColor = 'var(--gold)';
-}
-// Set min date for booking
-const bd = document.getElementById('bookingDate');
-if (bd) bd.min = new Date().toISOString().split('T')[0];
+
 </script>
 {% endblock %}

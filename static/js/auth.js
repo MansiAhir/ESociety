@@ -61,7 +61,7 @@ function closePopup(id) {
     btn.disabled = true;
     btn.textContent = 'Signing in…';
 
-    const formData  = new FormData(loginForm);
+    const formData = new FormData(loginForm);
     const csrftoken = getCookie('csrftoken');
 
     try {
@@ -102,30 +102,30 @@ function closePopup(id) {
 
 (function initSignup() {
   // ── Password strength meter ──
-  const pw1  = document.getElementById('id_password1');
+  const pw1 = document.getElementById('id_password1');
   const fill = document.getElementById('pwFill');
-  const lbl  = document.getElementById('pwLabel');
+  const lbl = document.getElementById('pwLabel');
 
   if (pw1 && fill && lbl) {
     pw1.addEventListener('input', () => {
       const v = pw1.value;
       let score = 0;
-      if (v.length >= 8)          score++;
-      if (/[A-Z]/.test(v))        score++;
-      if (/[0-9]/.test(v))        score++;
+      if (v.length >= 8) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
       if (/[^A-Za-z0-9]/.test(v)) score++;
 
       const map = [
-        { w: '0%',   c: 'transparent',       t: 'Enter a password' },
-        { w: '25%',  c: '#e74c3c',            t: 'Weak' },
-        { w: '50%',  c: '#e67e22',            t: 'Fair' },
-        { w: '75%',  c: 'var(--gold)',         t: 'Good' },
-        { w: '100%', c: 'var(--teal-light)',   t: 'Strong 🔒' },
+        { w: '0%', c: 'transparent', t: 'Enter a password' },
+        { w: '25%', c: '#e74c3c', t: 'Weak' },
+        { w: '50%', c: '#e67e22', t: 'Fair' },
+        { w: '75%', c: 'var(--gold)', t: 'Good' },
+        { w: '100%', c: 'var(--teal-light)', t: 'Strong 🔒' },
       ];
 
-      fill.style.width      = map[score].w;
+      fill.style.width = map[score].w;
       fill.style.background = map[score].c;
-      lbl.textContent       = map[score].t;
+      lbl.textContent = map[score].t;
     });
   }
 
@@ -140,7 +140,7 @@ function closePopup(id) {
     btn.disabled = true;
     btn.textContent = 'Creating account…';
 
-    const fd   = new FormData(signupForm);
+    const fd = new FormData(signupForm);
     const resp = await fetch(signupForm.action, {
       method: 'POST',
       body: fd,
@@ -184,14 +184,14 @@ function goToLogin() {
 /* ── AUTH VERIFY OTP JS ───────────────────────────────────────────────────── */
 
 (function initVerifyOtp() {
-  const countEl  = document.getElementById('countdown');
+  const countEl = document.getElementById('countdown');
   const ringFill = document.getElementById('ringFill');
-  const otpForm  = document.getElementById('otpForm');
+  const otpForm = document.getElementById('otpForm');
   const otpInput = document.querySelector('.otp-wrap input');
 
   if (!countEl) return; // Not on the OTP page
 
-  const TOTAL       = 10 * 60; // 10 minutes in seconds
+  const TOTAL = 10 * 60; // 10 minutes in seconds
   const CIRCUMFERENCE = 144.5; // 2πr for r=23
   let seconds = TOTAL;
 
@@ -263,21 +263,21 @@ function goToLogin() {
 /* ── SET NEW PASSWORD JS ──────────────────────────────────────────────────── */
 
 (function initSetNewPassword() {
-  const pw1        = document.getElementById('id_new_password1');
-  const pw2        = document.getElementById('id_new_password2');
-  const fill       = document.getElementById('pwFill');
-  const lbl        = document.getElementById('pwLabel');
-  const matchEl    = document.getElementById('matchIndicator');
-  const matchIcon  = document.getElementById('matchIcon');
-  const matchText  = document.getElementById('matchText');
+  const pw1 = document.getElementById('id_new_password1');
+  const pw2 = document.getElementById('id_new_password2');
+  const fill = document.getElementById('pwFill');
+  const lbl = document.getElementById('pwLabel');
+  const matchEl = document.getElementById('matchIndicator');
+  const matchIcon = document.getElementById('matchIcon');
+  const matchText = document.getElementById('matchText');
 
   if (!pw1) return; // Not on the set-new-password page
 
   // ── Live password requirement dots ──
   function setTip(id, met) {
-    const dot  = document.getElementById('tip' + id);
+    const dot = document.getElementById('tip' + id);
     const text = document.getElementById('tip' + id + 't');
-    if (dot)  dot.classList.toggle('met', met);
+    if (dot) dot.classList.toggle('met', met);
     if (text) text.classList.toggle('met', met);
   }
 
@@ -293,15 +293,15 @@ function goToLogin() {
 
     const score = checks.filter(Boolean).length;
     const map = [
-      { w: '0%',   c: 'transparent',       t: 'Enter a password' },
-      { w: '25%',  c: '#e74c3c',            t: 'Weak' },
-      { w: '50%',  c: '#e67e22',            t: 'Fair' },
-      { w: '75%',  c: 'var(--gold)',         t: 'Good' },
-      { w: '100%', c: 'var(--teal-light)',   t: 'Strong 🔒' },
+      { w: '0%', c: 'transparent', t: 'Enter a password' },
+      { w: '25%', c: '#e74c3c', t: 'Weak' },
+      { w: '50%', c: '#e67e22', t: 'Fair' },
+      { w: '75%', c: 'var(--gold)', t: 'Good' },
+      { w: '100%', c: 'var(--teal-light)', t: 'Strong 🔒' },
     ];
 
     if (fill) { fill.style.width = map[score].w; fill.style.background = map[score].c; }
-    if (lbl)  lbl.textContent = map[score].t;
+    if (lbl) lbl.textContent = map[score].t;
 
     checkMatch();
   });
@@ -320,7 +320,7 @@ function goToLogin() {
     }
 
     const same = pw1.value === pw2.value;
-    matchEl.className   = 'match-indicator ' + (same ? 'matched' : 'mismatch');
+    matchEl.className = 'match-indicator ' + (same ? 'matched' : 'mismatch');
     matchIcon.textContent = same ? '✓' : '✗';
     matchText.textContent = same ? 'Passwords match' : 'Passwords do not match';
   }

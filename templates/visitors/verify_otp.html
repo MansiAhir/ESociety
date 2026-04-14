@@ -100,10 +100,4 @@
 
 </div>
 
-<script>
-  /* Auto-format OTP input as digits only */
-  document.querySelector('input[name="otp"]').addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, '').slice(0, 6);
-  });
-</script>
 {% endblock %}

@@ -1,15 +1,7 @@
+{% extends "core/auth.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sign Up — eSociety</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="{% static 'css/auth.css' %}"/>
-</head>
-<body>
 
+{% block content %}
 <!-- ══ SIGNUP SUCCESS POPUP ══ -->
 <div class="popup-overlay dark-popup" id="signupSuccessPopup">
   <div class="popup-card dark-card">
@@ -29,16 +21,7 @@
 </div>
 
 <!-- ── NAV ── -->
-<nav>
-  <a href="{% url 'home' %}" class="nav-logo">
-    <div class="logo-icon">🏛️</div>
-    <span class="logo-name"><em>e</em>Society</span>
-  </a>
-  <div class="nav-actions">
-    <a href="{% url 'login' %}"  class="btn-nav btn-out">Login</a>
-    <a href="{% url 'signup' %}" class="btn-nav btn-sol">Sign Up</a>
-  </div>
-</nav>
+
 
 <div class="auth-wrapper">
   <div class="auth-left">
@@ -151,19 +134,8 @@
   </div>
 </div>
 
-<footer>
-  <div class="foot-logo"><em>e</em>Society Management System</div>
-  <div class="foot-links">
-    <a href="#">Privacy Policy</a>
-    <a href="#">Terms of Use</a>
-    <a href="#">Support</a>
-  </div>
-  <div class="foot-copy">© 2024 eSociety · Built for modern residential communities</div>
-</footer>
+{% endblock content %}
 
 <!-- Add this BEFORE your auth.js script tag in signup.html -->
 <script>const LOGIN_URL = "{% url 'login' %}";</script>
 
-<script src="{% static 'js/auth.js' %}"></script>
-</body>
-</html>
